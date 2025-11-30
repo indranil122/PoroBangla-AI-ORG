@@ -78,6 +78,59 @@ async function generateDiagram(prompt: string): Promise<string | null> {
   }
 }
 
+/**
+ * Generates Flashcards JSON from note content.
+ */
+export const generateFlashcards = async (noteContent: string, topic: string): Promise<{front: string, back: string}[]> => {
+  const modelId = 'gemini-2.5-flash';
+  
+  // Validate AI Connection
+  let ai;
+  try {
+    ai = getAI();
+  } catch (e: any) {
+    throw new Error(e.message);
+  }
+
+  const prompt = `
+    Analyze the following academic notes on the topic "${topic}".
+    Create 10 to 15 high-quality flashcards for a student to study.
+    
+    Format requirements:
+    - Return ONLY a raw JSON array.
+    - Each object must have "front" (question/term) and "back" (answer/definition).
+    - Keep "front" concise.
+    - Keep "back" clear and accurate.
+    - No Markdown formatting around the JSON (no \`\`\`json).
+    - Do not include any introductory text.
+    
+    Notes content:
+    ${noteContent.substring(0, 8000)} // Limit context to avoid token limits
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: modelId,
+      contents: prompt,
+    });
+    
+    let text = response.text || "[]";
+    // Clean up if the model adds markdown code blocks despite instructions
+    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    // Attempt to find JSON array if extra text exists
+    const jsonMatch = text.match(/\[.*\]/s);
+    if (jsonMatch) {
+      text = jsonMatch[0];
+    }
+    
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Flashcard Generation Error:", error);
+    throw new Error("Failed to generate flashcards.");
+  }
+};
+
 export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
   const modelId = 'gemini-2.5-flash';
   

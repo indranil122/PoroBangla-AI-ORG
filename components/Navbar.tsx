@@ -79,7 +79,19 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
              {!isGenerator && (
                <>
-                 {['Features', 'Pricing', 'Resources'].map((item) => (
+                 <button 
+                   onClick={() => navigate('/flashcards')}
+                   className={`
+                     px-4 py-1.5 text-sm font-medium transition-all duration-300 rounded-full
+                     ${isScrolled 
+                       ? 'text-secondary-dark hover:text-white hover:bg-white/5' 
+                       : 'text-secondary hover:text-white'
+                     }
+                   `}
+                 >
+                   Flashcards
+                 </button>
+                 {['Features', 'Pricing'].map((item) => (
                     <button 
                       key={item}
                       className={`
@@ -160,7 +172,11 @@ const Navbar: React.FC = () => {
              className="fixed top-24 left-4 right-4 z-40 bg-[#0F0F0F]/95 backdrop-blur-xl border border-secondary/20 rounded-2xl overflow-hidden shadow-2xl md:hidden"
           >
              <div className="p-6 flex flex-col gap-4">
-               {['Features', 'Pricing', 'Resources', 'Community'].map((item) => (
+               <button onClick={() => { navigate('/flashcards'); setIsMobileMenuOpen(false); }} className="text-left text-secondary py-3 border-b border-white/5 flex items-center justify-between group">
+                  Flashcards
+                  <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
+               </button>
+               {['Features', 'Pricing', 'Resources'].map((item) => (
                  <button key={item} className="text-left text-secondary py-3 border-b border-white/5 last:border-0 hover:text-white flex items-center justify-between group">
                    {item}
                    <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />

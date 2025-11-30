@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Sparkles, AlertCircle, Layers, GraduationCap, Settings, Type, LayoutTemplate, X, ArrowLeft, Languages } from 'lucide-react';
+import { Loader2, Sparkles, AlertCircle, Layers, GraduationCap, Settings, Type, LayoutTemplate, X, ArrowLeft, Languages, BrainCircuit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { NoteLanguage, NoteRequest } from '../types';
-import { generateNotes } from '../services/geminiService';
+import { generateNotes, generateFlashcards } from '../services/geminiService';
+import { createDeckFromAI } from '../services/flashcardService';
 import Notebook, { NotebookSettings } from '../components/Notebook';
 
 const Generator: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<'input' | 'result'>('input');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<NoteRequest>({
     topic: '',
@@ -40,6 +42,23 @@ const Generator: React.FC = () => {
       setError(err.message || "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCreateDeck = async () => {
+    if (!generatedContent || !formData.topic) return;
+    
+    setIsGeneratingDeck(true);
+    try {
+        const cards = await generateFlashcards(generatedContent, formData.topic);
+        if (cards && cards.length > 0) {
+            createDeckFromAI(formData.topic, cards);
+            navigate('/flashcards');
+        }
+    } catch (e) {
+        alert("Failed to create flashcards. Please try again.");
+    } finally {
+        setIsGeneratingDeck(false);
     }
   };
 
@@ -328,6 +347,24 @@ const Generator: React.FC = () => {
                         >
                             New Note
                         </button>
+                        
+                        {/* Generate Flashcards Button (NEW) */}
+                        <button 
+                            onClick={handleCreateDeck}
+                            disabled={isGeneratingDeck}
+                            className={`px-6 py-2.5 rounded-xl bg-white/5 border border-primary/30 text-primary hover:bg-primary hover:text-black transition-all text-sm font-semibold flex items-center gap-2 ${isGeneratingDeck ? 'opacity-50 cursor-wait' : ''}`}
+                        >
+                            {isGeneratingDeck ? (
+                                <>
+                                  <Loader2 size={16} className="animate-spin" /> Generating...
+                                </>
+                            ) : (
+                                <>
+                                  <BrainCircuit size={16} /> Flashcards
+                                </>
+                            )}
+                        </button>
+
                         <button 
                             onClick={() => window.print()}
                             className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#D8A441] to-[#F3C567] text-black hover:brightness-110 transition-all text-sm font-semibold shadow-lg shadow-[#D8A441]/20 flex items-center gap-2"

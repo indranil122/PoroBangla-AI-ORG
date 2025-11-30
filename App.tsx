@@ -4,6 +4,8 @@ import AnimatedBackground from './components/AnimatedBackground';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Generator from './pages/Generator';
+import FlashcardDashboard from './pages/FlashcardDashboard';
+import StudySession from './pages/StudySession';
 import ScrollEffectWrapper from './components/ScrollEffectWrapper';
 
 const App: React.FC = () => {
@@ -18,6 +20,8 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/generate" element={<Generator />} />
+            <Route path="/flashcards" element={<FlashcardDashboard />} />
+            <Route path="/study/:id" element={<StudySession />} />
           </Routes>
         </ScrollEffectWrapper>
       </HashRouter>
