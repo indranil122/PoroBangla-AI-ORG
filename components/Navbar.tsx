@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
       borderRadius: "0px",
       backgroundColor: "rgba(5, 5, 7, 0)",
       borderColor: "rgba(255, 255, 255, 0)",
-      paddingTop: "1.5rem",
+      paddingTop: "2.5rem", // Increased padding to make it hang lower
       paddingBottom: "1.5rem",
       backdropFilter: "blur(0px)",
       boxShadow: "0 0 0 0 rgba(0,0,0,0)",

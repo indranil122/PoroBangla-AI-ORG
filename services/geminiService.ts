@@ -2,11 +2,50 @@ import { GoogleGenAI } from "@google/genai";
 import { NoteRequest, GeneratedNote } from "../types";
 
 /**
+ * Robustly retrieves the API Key from various environment locations.
+ * Vercel/Vite requires 'VITE_' prefix for browser access.
+ */
+const getApiKey = (): string | undefined => {
+  // 1. Check Vite standard (import.meta.env) - Used in modern frontends
+  // @ts-ignore
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    // @ts-ignore
+    if (import.meta.env.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
+    // @ts-ignore
+    if (import.meta.env.API_KEY) return import.meta.env.API_KEY;
+  }
+
+  // 2. Check Standard Process Env (Node/CRA/Webpack/Vercel) - Used in server environments
+  if (typeof process !== 'undefined' && process.env) {
+    if (process.env.VITE_API_KEY) return process.env.VITE_API_KEY;
+    if (process.env.REACT_APP_API_KEY) return process.env.REACT_APP_API_KEY;
+    if (process.env.API_KEY) return process.env.API_KEY;
+    if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
+  }
+
+  return undefined;
+};
+
+/**
+ * Lazy initialization helper.
+ */
+const getAI = () => {
+  const apiKey = getApiKey();
+  
+  if (!apiKey) {
+    console.error("API Key not found. Checked: VITE_API_KEY, REACT_APP_API_KEY, API_KEY, GEMINI_API_KEY.");
+    throw new Error("Configuration Error: API Key is missing. In Vercel, ensure you have set the correct environment variable.");
+  }
+  
+  return new GoogleGenAI({ apiKey });
+};
+
+/**
  * Generates a diagram/image using the nano banana model (gemini-2.5-flash-image).
  */
 async function generateDiagram(prompt: string): Promise<string | null> {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
@@ -36,8 +75,14 @@ async function generateDiagram(prompt: string): Promise<string | null> {
 export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
   const modelId = 'gemini-2.5-flash';
   
-  // Initialize AI client strictly with process.env.API_KEY
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  // Validate AI Connection
+  let ai;
+  try {
+    ai = getAI();
+  } catch (e: any) {
+    // Re-throw the configuration error
+    throw new Error(e.message);
+  }
   
   const prompt = `You are an expert teacher and note-maker. The user has provided the following inputs:
 – Topic: "${request.topic}"
@@ -71,7 +116,7 @@ DIAGRAMS & VISUALS:
 If a visual diagram, chart, or scientific picture is REQUIRED to explain a concept (e.g. "Structure of an Atom", "Circuit Diagram", "Flowchart of Process"):
 1. You must create a REALISTIC PROMPT for an image generation model.
 2. Insert a placeholder tag in this EXACT format:
-   <<IMAGE_PROMPT: A detailed, educational diagram showing [description]>>
+   <<IMAGE_PROMPT: A detailed, educational diagram showing [description]>>
 3. Do not use this for simple decorative images. Only for educational value.
 4. Limit to maximum 1-2 diagrams per note.
 
@@ -81,8 +126,8 @@ Structured Layout & Formatting (in Markdown):
 - Use hierarchical headings: #, ##, ###.
 - Provide a table of contents.
 - Use LaTeX for ALL mathematical/chemical formulas (Always use default dark color, never white).
-  - Inline: $ equation $
-  - Block: $$ equation $$
+  - Inline: $ equation $
+  - Block: $$ equation $$
 - Use code blocks for all code examples.
 - Use callout boxes (Definition:, Important:).
 
@@ -105,7 +150,7 @@ BEGIN NOTES for (${request.topic}, ${request.grade}).`;
     let content = response.text;
 
     if (!content) {
-       throw new Error("The AI returned an empty response. Please try a different topic.");
+      throw new Error("The AI returned an empty response. Please try a different topic.");
     }
 
     // Parse and Generate Images for <<IMAGE_PROMPT: ...>> tags
