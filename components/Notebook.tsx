@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { NoteLanguage } from '../types';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import { Check, ZoomIn, BookOpen } from 'lucide-react';
+import { Check, ZoomIn, BookOpen, Save } from 'lucide-react';
 
 export interface NotebookSettings {
   fontSize: 'sm' | 'md' | 'lg';
@@ -55,6 +55,7 @@ const ListItem: React.FC<React.LiHTMLAttributes<HTMLLIElement> & { ordered?: boo
 
 const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings = { fontSize: 'md', layout: 'standard' } }) => {
   const fontClass = language === NoteLanguage.Bengali ? 'font-bengali' : 'font-sans';
+  const [isSaved, setIsSaved] = useState(false);
   
   // Dynamic Styles based on settings
   const containerWidth = settings.layout === 'wide' ? 'max-w-7xl' : 'max-w-5xl';
@@ -71,6 +72,26 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
     lg: 'text-5xl'
   }[settings.fontSize];
 
+  const handleSave = () => {
+    try {
+      const noteData = {
+        id: Date.now().toString(),
+        title,
+        content,
+        language,
+        date: new Date().toISOString(),
+      };
+      
+      const existing = JSON.parse(localStorage.getItem('porobangla_saved_notes') || '[]');
+      localStorage.setItem('porobangla_saved_notes', JSON.stringify([noteData, ...existing]));
+      
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2000);
+    } catch (error) {
+      console.error("Failed to save note:", error);
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 40 }}
@@ -79,10 +100,40 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
       className={`relative w-full ${containerWidth} mx-auto transition-all duration-500 ease-in-out print:w-full print:max-w-none print:mx-0`}
     >
       {/* The Paper Card */}
-      <div id="printable-notebook" className="relative bg-zinc-50 rounded-lg shadow-2xl overflow-hidden min-h-[800px] print:shadow-none print:rounded-none print:bg-white print:overflow-visible">
+      <div id="printable-notebook" className="relative bg-zinc-50 rounded-lg shadow-2xl overflow-hidden min-h-[800px] print:shadow-none print:rounded-none print:bg-white print:overflow-visible group/notebook">
         
         {/* Top Accent Line - Hide in print */}
         <div className="h-1.5 w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-violet-500 print:hidden"></div>
+
+        {/* Save Button (Web Only) */}
+        <button
+          onClick={handleSave}
+          disabled={isSaved}
+          className="absolute top-6 right-6 z-20 p-2.5 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-400 hover:text-violet-600 hover:border-violet-200 hover:bg-white shadow-sm hover:shadow-md transition-all duration-300 print:hidden opacity-0 group-hover/notebook:opacity-100 focus:opacity-100"
+          title="Save to Browser Storage"
+        >
+          <AnimatePresence mode="wait">
+            {isSaved ? (
+              <motion.div
+                key="saved"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+              >
+                <Check size={20} className="text-green-500" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="save"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+              >
+                <Save size={20} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </button>
 
         {/* PRINT ONLY HEADER - Visible only on paper */}
         <div className="hidden print:block border-b-2 border-black mb-8 pb-4 pt-4 px-0">
