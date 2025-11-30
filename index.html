@@ -21,17 +21,26 @@
               mono: ['JetBrains Mono', 'monospace'],
             },
             colors: {
-              background: '#050507', // Deep charcoal/dusk
-              surface: '#0f1115', // Slightly lighter dark
+              // LUXURY PALETTE
+              background: '#050505', // True Black/Deepest Charcoal
+              surface: '#0F0F0F', // Card Black
               glass: 'rgba(255, 255, 255, 0.03)',
-              'glass-border': 'rgba(255, 255, 255, 0.08)',
-              primary: '#8b5cf6', // Violet
-              secondary: '#ec4899', // Pink
-              accent: '#2dd4bf', // Teal
+              'glass-border': 'rgba(138, 143, 148, 0.2)', // Silver tint
+              
+              // Gold System
+              primary: '#F3C567', // Soft Warm Gold
+              'primary-dark': '#D8A441', // Deep Gold
+              
+              // Silver System
+              secondary: '#C8CCD1', // Metallic Silver
+              'secondary-dark': '#8A8F94', // Steel Silver
+              
+              accent: '#F3C567', // Gold Accent
             },
             backgroundImage: {
-              'aurora-gradient': 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-              'subtle-glow': 'radial-gradient(circle at center, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
+              'gold-gradient': 'linear-gradient(135deg, #D8A441 0%, #F3C567 100%)',
+              'silver-gradient': 'linear-gradient(135deg, #8A8F94 0%, #C8CCD1 100%)',
+              'subtle-glow': 'radial-gradient(circle at center, rgba(243, 197, 103, 0.08) 0%, transparent 70%)',
             },
             animation: {
               'aurora': 'aurora 20s ease-in-out infinite alternate',
@@ -41,8 +50,8 @@
             },
             keyframes: {
               aurora: {
-                '0%': { filter: 'hue-rotate(0deg)' },
-                '100%': { filter: 'hue-rotate(30deg)' },
+                '0%': { transform: 'translate(0, 0) scale(1)' },
+                '100%': { transform: 'translate(10px, -10px) scale(1.1)' },
               },
               float: {
                 '0%, 100%': { transform: 'translateY(0)' },
@@ -69,55 +78,52 @@
       }
 
       body {
-        background-color: #050507;
-        color: #f8fafc;
+        background-color: #050505;
+        color: #F8F8F8; /* Soft White */
         overflow-x: hidden;
       }
       
-      /* Custom Scrollbar */
+      /* Custom Scrollbar - Gold/Silver Theme */
       ::-webkit-scrollbar {
         width: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #050507;
+        background: #050505;
       }
       ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(138, 143, 148, 0.3); /* Steel Silver */
         border-radius: 3px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: #F3C567; /* Gold on hover */
       }
       
-      /* KaTeX overrides for the new design */
+      /* KaTeX overrides for SCREEN (Dark Mode) */
       .katex {
         font-size: 1.1em !important;
-        color: #1e293b !important; 
+        color: #C8CCD1 !important; /* Silver for screen visibility */
+      }
+      .katex .katex-html {
+         color: #C8CCD1 !important;
       }
       
-      /* Force dark color for visibility on light paper surfaces */
-      .katex, .katex * {
-        color: #1e293b !important;
-        border-color: #1e293b !important;
-      }
-
       /* Glassmorphism Utilities */
       .glass-panel {
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(15, 15, 15, 0.6);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(138, 143, 148, 0.2);
       }
       
       .glass-card {
-        background: rgba(255, 255, 255, 0.02);
+        background: rgba(15, 15, 15, 0.4);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(138, 143, 148, 0.1);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
       }
 
-      /* PRINT OPTIMIZATIONS */
+      /* PRINT OPTIMIZATIONS - STRICT OVERRIDES */
       @media print {
         @page {
           margin: 1.5cm;
@@ -173,9 +179,14 @@
           overflow: visible !important;
         }
 
-        /* Force colors */
+        /* Force colors back to Black/White for Print */
         h1, h2, h3, h4, h5, h6, p, li, span, div, td, th, strong, em {
           color: black !important;
+        }
+        
+        /* Ensure KaTeX is black in print */
+        .katex, .katex .katex-html, .katex * {
+           color: black !important;
         }
         
         a {
@@ -196,7 +207,8 @@
     "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
     "remark-math": "https://aistudiocdn.com/remark-math@^6.0.0",
-    "rehype-katex": "https://aistudiocdn.com/rehype-katex@^7.0.0"
+    "rehype-katex": "https://aistudiocdn.com/rehype-katex@^7.0.0",
+    "@google/generative-ai": "https://aistudiocdn.com/@google/generative-ai@^0.24.1"
   }
 }
 </script>
@@ -204,14 +216,13 @@
   <body>
     <div id="root">
       <!-- Fallback loader (SVG) that displays while React is loading. -->
-      <div style="height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050507; color: #8b5cf6;">
+      <div style="height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050505; color: #F3C567;">
         <svg class="animate-spin" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10" stroke-opacity="0.2"></circle>
           <path d="M22 12c0-5.523-4.477-10-10-10" stroke-opacity="1"></path>
         </svg>
       </div>
     </div>
-    <!-- CRITICAL FIX: Load the entry point -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>

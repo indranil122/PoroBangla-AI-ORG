@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const SocialIcon = ({ icon: Icon, href }: { icon: any, href: string }) => (
   <a 
     href={href}
-    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-300 border border-white/5 hover:scale-110 hover:border-white/20"
+    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-secondary-dark hover:text-white hover:bg-white/10 transition-all duration-300 border border-white/5 hover:scale-110 hover:border-primary/50"
   >
     <Icon size={18} />
   </a>
@@ -14,8 +14,8 @@ const SocialIcon = ({ icon: Icon, href }: { icon: any, href: string }) => (
 
 const FooterLink: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.li variants={{ hidden: { opacity: 0, x: -10 }, visible: { opacity: 1, x: 0 } }}>
-    <a href="#" className="text-slate-500 hover:text-violet-400 transition-colors text-sm font-medium flex items-center gap-2 group">
-      <span className="w-0 h-[1px] bg-violet-400 transition-all duration-300 group-hover:w-3"></span>
+    <a href="#" className="text-secondary-dark hover:text-primary transition-colors text-sm font-medium flex items-center gap-2 group">
+      <span className="w-0 h-[1px] bg-primary transition-all duration-300 group-hover:w-3"></span>
       {children}
     </a>
   </motion.li>
@@ -40,15 +40,15 @@ const Footer: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <footer className="relative w-full bg-black pt-32 overflow-hidden border-t border-white/5">
+    <footer className="relative w-full bg-[#050505] pt-32 overflow-hidden border-t border-secondary/10">
       
-      {/* Ambient Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[500px] bg-violet-900/10 blur-[120px] rounded-full pointer-events-none"></div>
+      {/* Ambient Glow - Gold */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[500px] bg-[#F3C567]/5 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         
         {/* Massive CTA Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 pb-24 border-b border-white/10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 pb-24 border-b border-secondary/10">
             <div className="max-w-3xl">
                 <motion.h2 
                     initial={{ opacity: 0, y: 20 }}
@@ -57,11 +57,11 @@ const Footer: React.FC = () => {
                     className="text-5xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight mb-8 leading-[0.95]"
                 >
                     Ready to learn <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-white animate-pulse-slow">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D8A441] via-[#F3C567] to-white animate-pulse-slow">
                         superhumanly?
                     </span>
                 </motion.h2>
-                <p className="text-slate-400 text-lg md:text-xl max-w-xl leading-relaxed">
+                <p className="text-secondary-dark text-lg md:text-xl max-w-xl leading-relaxed">
                     Join the academic revolution. Turn complex chaos into structured clarity with PoroBangla AI.
                 </p>
             </div>
@@ -89,7 +89,7 @@ const Footer: React.FC = () => {
                     />
                     <span className="font-bold text-2xl text-white tracking-tight">PoroBangla</span>
                 </div>
-                <p className="text-slate-500 text-sm leading-7 mb-8">
+                <p className="text-secondary-dark text-sm leading-7 mb-8">
                     An advanced AI research companion designed for students, professionals, and lifelong learners. We prioritize accuracy, structure, and aesthetic clarity.
                 </p>
                 <div className="flex gap-4">
@@ -117,24 +117,24 @@ const Footer: React.FC = () => {
       </div>
 
       {/* GIANT BRAND WATERMARK */}
-      <div className="w-full border-t border-white/5 bg-white/[0.02] overflow-hidden group cursor-default">
+      <div className="w-full border-t border-secondary/5 bg-white/[0.02] overflow-hidden group cursor-default">
         <motion.div 
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-[1920px] mx-auto relative"
         >
-            <h1 className="text-[15vw] md:text-[13vw] font-black text-center text-white/[0.03] tracking-tighter leading-[0.8] py-4 select-none transition-all duration-700 group-hover:text-white/[0.08] group-hover:scale-105">
+            <h1 className="text-[15vw] md:text-[13vw] font-black text-center text-[#F3C567]/[0.05] tracking-tighter leading-[0.8] py-4 select-none transition-all duration-700 group-hover:text-[#F3C567]/[0.1] group-hover:scale-105">
                 POROBANGLA
             </h1>
             {/* Hover Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none mix-blend-overlay"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F3C567]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none mix-blend-overlay"></div>
         </motion.div>
       </div>
       
       {/* Bottom Bar */}
-      <div className="w-full bg-black py-6 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600">
+      <div className="w-full bg-black py-6 border-t border-secondary/10">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-secondary-dark">
             <p>© 2024 PoroBangla AI Inc. All rights reserved.</p>
             <div className="flex gap-8">
                 <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>

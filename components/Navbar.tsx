@@ -18,34 +18,32 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Animation variants for the "squeeze" effect
-  // Explicitly defining all properties in both states ensures smooth bidirectional animation
   const navVariants = {
     top: { 
       width: "100%", 
-      maxWidth: "100vw", // FIX: Use 100vw to ensure it always interpolates correctly from 800px
+      maxWidth: "100vw",
       y: 0, 
       borderRadius: "0px",
-      backgroundColor: "rgba(5, 5, 7, 0)",
+      backgroundColor: "rgba(5, 5, 5, 0)",
       borderColor: "rgba(255, 255, 255, 0)",
-      paddingTop: "2.5rem", // Increased padding to make it hang lower
+      paddingTop: "2.5rem",
       paddingBottom: "1.5rem",
       backdropFilter: "blur(0px)",
       boxShadow: "0 0 0 0 rgba(0,0,0,0)",
-      transform: "translateZ(0)" // Force hardware acceleration
+      transform: "translateZ(0)"
     },
     scrolled: { 
       width: "90%", 
       maxWidth: "800px", 
       y: 20, 
       borderRadius: "9999px",
-      backgroundColor: "rgba(15, 17, 21, 0.8)",
-      borderColor: "rgba(255, 255, 255, 0.08)",
+      backgroundColor: "rgba(15, 15, 15, 0.9)", // Dark Card
+      borderColor: "rgba(200, 204, 209, 0.2)", // Silver border
       paddingTop: "0.75rem",
       paddingBottom: "0.75rem",
       backdropFilter: "blur(16px)",
-      boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)",
-      transform: "translateZ(0)" // Force hardware acceleration
+      boxShadow: "0 10px 40px -10px rgba(0,0,0,0.8)",
+      transform: "translateZ(0)"
     }
   };
 
@@ -71,9 +69,9 @@ const Navbar: React.FC = () => {
             />
             <span className={`
               font-bold tracking-tight transition-all duration-300
-              ${isScrolled ? 'text-sm text-white' : 'text-lg text-white'}
+              ${isScrolled ? 'text-sm text-secondary' : 'text-lg text-secondary'}
             `}>
-              PoroBangla<span className="text-violet-400">AI</span>
+              PoroBangla<span className="text-primary">AI</span>
             </span>
           </div>
 
@@ -87,8 +85,8 @@ const Navbar: React.FC = () => {
                       className={`
                         px-4 py-1.5 text-sm font-medium transition-all duration-300 rounded-full
                         ${isScrolled 
-                          ? 'text-slate-400 hover:text-white hover:bg-white/10' 
-                          : 'text-slate-300 hover:text-white'
+                          ? 'text-secondary-dark hover:text-white hover:bg-white/5' 
+                          : 'text-secondary hover:text-white'
                         }
                       `}
                     >
@@ -104,7 +102,7 @@ const Navbar: React.FC = () => {
              {/* Mobile Menu Toggle */}
              <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 text-slate-300 hover:text-white transition-colors"
+                className="md:hidden p-2 text-secondary hover:text-primary transition-colors"
              >
                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
              </button>
@@ -123,8 +121,8 @@ const Navbar: React.FC = () => {
                    className={`
                       hidden md:flex items-center gap-2 font-semibold transition-all duration-500
                       ${isScrolled 
-                         ? 'px-5 py-2 text-xs bg-white text-black rounded-full'
-                         : 'px-6 py-2.5 text-sm bg-white/10 text-white border border-white/10 rounded-full hover:bg-white/20'
+                         ? 'px-5 py-2 text-xs bg-gradient-to-r from-[#D8A441] to-[#F3C567] text-black rounded-full'
+                         : 'px-6 py-2.5 text-sm bg-white/5 text-secondary border border-secondary/20 rounded-full hover:bg-white/10 hover:border-primary/50 hover:text-primary'
                       }
                    `}
                  >
@@ -140,10 +138,10 @@ const Navbar: React.FC = () => {
                     onClick={() => navigate('/')}
                     className={`
                       hidden md:flex items-center gap-2 font-medium transition-colors
-                      ${isScrolled ? 'text-xs text-slate-400 hover:text-white' : 'text-sm text-slate-400 hover:text-white'}
+                      ${isScrolled ? 'text-xs text-secondary-dark hover:text-white' : 'text-sm text-secondary hover:text-white'}
                     `}
                 >
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
                     Exit Workspace
                 </motion.button>
                )}
@@ -159,13 +157,13 @@ const Navbar: React.FC = () => {
              initial={{ opacity: 0, y: -20, height: 0 }}
              animate={{ opacity: 1, y: 0, height: 'auto' }}
              exit={{ opacity: 0, y: -20, height: 0 }}
-             className="fixed top-24 left-4 right-4 z-40 bg-[#0f1115]/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl md:hidden"
+             className="fixed top-24 left-4 right-4 z-40 bg-[#0F0F0F]/95 backdrop-blur-xl border border-secondary/20 rounded-2xl overflow-hidden shadow-2xl md:hidden"
           >
              <div className="p-6 flex flex-col gap-4">
                {['Features', 'Pricing', 'Resources', 'Community'].map((item) => (
-                 <button key={item} className="text-left text-slate-300 py-3 border-b border-white/5 last:border-0 hover:text-white flex items-center justify-between group">
+                 <button key={item} className="text-left text-secondary py-3 border-b border-white/5 last:border-0 hover:text-white flex items-center justify-between group">
                    {item}
-                   <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-violet-400" />
+                   <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
                  </button>
                ))}
                <button 
@@ -173,7 +171,7 @@ const Navbar: React.FC = () => {
                     navigate('/generate');
                     setIsMobileMenuOpen(false);
                  }}
-                 className="mt-2 w-full py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-xl flex items-center justify-center gap-2"
+                 className="mt-2 w-full py-4 bg-gradient-to-r from-[#D8A441] to-[#F3C567] text-black font-bold rounded-xl flex items-center justify-center gap-2"
                >
                  <Zap size={16} fill="currentColor" /> Launch App
                </button>

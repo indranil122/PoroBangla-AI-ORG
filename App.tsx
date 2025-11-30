@@ -8,7 +8,7 @@ import ScrollEffectWrapper from './components/ScrollEffectWrapper';
 
 const App: React.FC = () => {
   return (
-    <div className="antialiased text-slate-200 selection:bg-violet-500/30 font-sans min-h-screen">
+    <div className="antialiased text-secondary selection:bg-primary/30 font-sans min-h-screen">
       <AnimatedBackground />
       <HashRouter>
         <Navbar />
