@@ -1,13 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
 import { NoteRequest, GeneratedNote } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+/**
+ * Lazy initialization helper.
+ * This ensures we only access process.env.API_KEY when a request is actually made,
+ * preventing 'process is not defined' errors from crashing the app at startup.
+ */
+const getAI = () => {
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+};
 
 /**
  * Generates a diagram/image using the nano banana model (gemini-2.5-flash-image).
  */
 async function generateDiagram(prompt: string): Promise<string | null> {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
@@ -92,6 +100,8 @@ Tone & Style:
 BEGIN NOTES for (${request.topic}, ${request.grade}).`;
 
   try {
+    const ai = getAI();
+    
     // 1. Generate Text Content
     const response = await ai.models.generateContent({
       model: modelId,

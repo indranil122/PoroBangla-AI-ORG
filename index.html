@@ -61,6 +61,12 @@
       }
     </script>
     <style>
+      html, body, #root {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
       body {
         background-color: #050507;
         color: #f8fafc;
@@ -85,9 +91,6 @@
       /* KaTeX overrides for the new design */
       .katex {
         font-size: 1.1em !important;
-        /* Ensure math is dark on the white paper card, but if we used dark cards, we'd need white. 
-           However, the prompt asks for "Paper-like aesthetic" which usually implies light surface 
-           for readability. We will stick to a light paper card for the note content. */
         color: #1e293b !important; 
       }
       
@@ -131,6 +134,16 @@
 </script>
 </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Fallback loader (SVG) that displays while React is loading. -->
+      <div style="height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050507; color: #8b5cf6;">
+        <svg class="animate-spin" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" stroke-opacity="0.2"></circle>
+          <path d="M22 12c0-5.523-4.477-10-10-10" stroke-opacity="1"></path>
+        </svg>
+      </div>
+    </div>
+    <!-- CRITICAL FIX: Load the entry point -->
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
