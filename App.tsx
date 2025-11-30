@@ -4,6 +4,7 @@ import AnimatedBackground from './components/AnimatedBackground';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Generator from './pages/Generator';
+import ScrollEffectWrapper from './components/ScrollEffectWrapper';
 
 const App: React.FC = () => {
   return (
@@ -11,10 +12,14 @@ const App: React.FC = () => {
       <AnimatedBackground />
       <HashRouter>
         <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/generate" element={<Generator />} />
-        </Routes>
+        {/* We wrap the routes in the ScrollEffectWrapper to apply physics-based motion blur during scroll.
+            Navbar and Background remain outside to stay fixed and sharp. */}
+        <ScrollEffectWrapper>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/generate" element={<Generator />} />
+          </Routes>
+        </ScrollEffectWrapper>
       </HashRouter>
     </div>
   );

@@ -2,49 +2,11 @@ import { GoogleGenAI } from "@google/genai";
 import { NoteRequest, GeneratedNote } from "../types";
 
 /**
- * Robustly retrieves the API Key from various environment locations.
- * Vercel/Vite requires 'VITE_' prefix for browser access.
- */
-const getApiKey = (): string | undefined => {
-  // 1. Check Vite standard (import.meta.env)
-  // @ts-ignore - import.meta might not be typed in all environments
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    // @ts-ignore
-    if (import.meta.env.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
-    // @ts-ignore
-    if (import.meta.env.API_KEY) return import.meta.env.API_KEY;
-  }
-
-  // 2. Check Standard Process Env (Node/CRA/Webpack)
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env.VITE_API_KEY) return process.env.VITE_API_KEY;
-    if (process.env.REACT_APP_API_KEY) return process.env.REACT_APP_API_KEY;
-    if (process.env.API_KEY) return process.env.API_KEY;
-  }
-
-  return undefined;
-};
-
-/**
- * Lazy initialization helper.
- */
-const getAI = () => {
-  const apiKey = getApiKey();
-  
-  if (!apiKey) {
-    console.error("API Key not found. Checked: VITE_API_KEY, REACT_APP_API_KEY, API_KEY.");
-    throw new Error("Configuration Error: API Key is missing. In Vercel, please name your environment variable 'VITE_API_KEY' and Redeploy.");
-  }
-  
-  return new GoogleGenAI({ apiKey });
-};
-
-/**
  * Generates a diagram/image using the nano banana model (gemini-2.5-flash-image).
  */
 async function generateDiagram(prompt: string): Promise<string | null> {
   try {
-    const ai = getAI();
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
@@ -74,13 +36,8 @@ async function generateDiagram(prompt: string): Promise<string | null> {
 export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
   const modelId = 'gemini-2.5-flash';
   
-  // 1. Validate AI Connection before doing anything
-  let ai;
-  try {
-    ai = getAI();
-  } catch (e: any) {
-    throw new Error(e.message);
-  }
+  // Initialize AI client strictly with process.env.API_KEY
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const prompt = `You are an expert teacher and note-maker. The user has provided the following inputs:
 – Topic: "${request.topic}"
@@ -136,7 +93,7 @@ Tone & Style:
 BEGIN NOTES for (${request.topic}, ${request.grade}).`;
 
   try {
-    // 2. Generate Text Content
+    // Generate Text Content
     const response = await ai.models.generateContent({
       model: modelId,
       contents: prompt,
@@ -151,7 +108,7 @@ BEGIN NOTES for (${request.topic}, ${request.grade}).`;
        throw new Error("The AI returned an empty response. Please try a different topic.");
     }
 
-    // 3. Parse and Generate Images for <<IMAGE_PROMPT: ...>> tags
+    // Parse and Generate Images for <<IMAGE_PROMPT: ...>> tags
     const imageTagRegex = /<<IMAGE_PROMPT:\s*(.*?)>>/g;
     const matches = [...content.matchAll(imageTagRegex)];
 
