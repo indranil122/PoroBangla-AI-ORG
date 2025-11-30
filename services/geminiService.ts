@@ -2,41 +2,41 @@ import { GoogleGenAI } from "@google/genai";
 import { NoteRequest, GeneratedNote } from "../types";
 
 /**
- * Robustly retrieves the API Key from various environment locations.
- * Vercel/Vite requires 'VITE_' prefix for browser access.
+ * Retrieves the API Key from standard Node.js environment process variables.
+ * For Vercel deployments (serverless functions), keys are accessed via process.env.
  */
 const getApiKey = (): string | undefined => {
-  // 1. Check Vite standard (import.meta.env) - Used in modern frontends
-  // @ts-ignore
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    // @ts-ignore
-    if (import.meta.env.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
-    // @ts-ignore
-    if (import.meta.env.API_KEY) return import.meta.env.API_KEY;
-  }
-
-  // 2. Check Standard Process Env (Node/CRA/Webpack/Vercel) - Used in server environments
+  // Check Standard Process Env (Node/Vercel)
   if (typeof process !== 'undefined' && process.env) {
+    // Check for the preferred and standard Gemini SDK variable
+    if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
+    
+    // Check for other possible variables if GEMINI_API_KEY is not set (optional fallback)
     if (process.env.VITE_API_KEY) return process.env.VITE_API_KEY;
     if (process.env.REACT_APP_API_KEY) return process.env.REACT_APP_API_KEY;
     if (process.env.API_KEY) return process.env.API_KEY;
-    if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
   }
+  
+  // Note: The original code's check for 'import.meta.env' is for browser-side Vite/modern frontends.
+  // Since this is likely a serverless function, we prioritize process.env.
 
   return undefined;
 };
 
 /**
  * Lazy initialization helper.
+ * The error message now correctly points to GEMINI_API_KEY.
  */
 const getAI = () => {
   const apiKey = getApiKey();
   
   if (!apiKey) {
-    console.error("API Key not found. Checked: VITE_API_KEY, REACT_APP_API_KEY, API_KEY, GEMINI_API_KEY.");
-    throw new Error("Configuration Error: API Key is missing. In Vercel, ensure you have set the correct environment variable.");
+    // FIX: Updated the console log and the error message to explicitly guide toward GEMINI_API_KEY
+    console.error("Configuration Error: API Key not found. Please ensure GEMINI_API_KEY is set.");
+    throw new Error("Configuration Error: API Key is missing. In Vercel, ensure you have set the **GEMINI_API_KEY** environment variable.");
   }
   
+  // The GoogleGenAI client is initialized with the retrieved key
   return new GoogleGenAI({ apiKey });
 };
 
