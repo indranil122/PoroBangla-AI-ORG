@@ -36,8 +36,9 @@ const Generator: React.FC = () => {
       const result = await generateNotes(formData);
       setGeneratedContent(result.content);
       setStep('result');
-    } catch (err) {
-      setError("Unable to generate notes. Please try again.");
+    } catch (err: any) {
+      // Display the actual error message coming from the service
+      setError(err.message || "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -71,9 +72,9 @@ const Generator: React.FC = () => {
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-violet-500 opacity-50"></div>
 
                 {error && (
-                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-200 text-sm">
-                        <AlertCircle size={16} />
-                        <span>{error}</span>
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-200 text-sm">
+                        <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+                        <span className="font-mono text-xs">{error}</span>
                     </div>
                 )}
 

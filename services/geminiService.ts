@@ -3,11 +3,18 @@ import { NoteRequest, GeneratedNote } from "../types";
 
 /**
  * Lazy initialization helper.
- * This ensures we only access process.env.API_KEY when a request is actually made,
- * preventing 'process is not defined' errors from crashing the app at startup.
+ * This ensures we only access process.env.API_KEY when a request is actually made.
  */
 const getAI = () => {
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const apiKey = process.env.API_KEY;
+  
+  // CRITICAL DEBUG CHECK
+  if (!apiKey) {
+    console.error("API_KEY is missing from environment variables.");
+    throw new Error("Configuration Error: API_KEY is missing. Please check your Vercel Environment Variables.");
+  }
+  
+  return new GoogleGenAI({ apiKey });
 };
 
 /**
@@ -23,12 +30,11 @@ async function generateDiagram(prompt: string): Promise<string | null> {
       },
       config: {
         imageConfig: {
-          aspectRatio: "16:9", // Cinematic/landscape aspect ratio for diagrams
+          aspectRatio: "16:9", 
         }
       }
     });
 
-    // Extract image data from the response parts
     for (const candidate of response.candidates || []) {
       for (const part of candidate.content?.parts || []) {
         if (part.inlineData && part.inlineData.data) {
@@ -38,13 +44,21 @@ async function generateDiagram(prompt: string): Promise<string | null> {
     }
     return null;
   } catch (error) {
-    console.error("Failed to generate diagram:", error);
-    return null; // Fail gracefully, the tag will just be removed or ignored
+    console.warn("Diagram generation skipped:", error);
+    return null; 
   }
 }
 
 export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
   const modelId = 'gemini-2.5-flash';
+  
+  // 1. Validate AI Connection before doing anything
+  let ai;
+  try {
+    ai = getAI();
+  } catch (e: any) {
+    throw new Error(e.message);
+  }
   
   const prompt = `You are an expert teacher and note-maker. The user has provided the following inputs:
 – Topic: "${request.topic}"
@@ -100,9 +114,7 @@ Tone & Style:
 BEGIN NOTES for (${request.topic}, ${request.grade}).`;
 
   try {
-    const ai = getAI();
-    
-    // 1. Generate Text Content
+    // 2. Generate Text Content
     const response = await ai.models.generateContent({
       model: modelId,
       contents: prompt,
@@ -111,14 +123,17 @@ BEGIN NOTES for (${request.topic}, ${request.grade}).`;
       }
     });
 
-    let content = response.text || "Failed to generate notes. Please try again.";
+    let content = response.text;
 
-    // 2. Parse and Generate Images for <<IMAGE_PROMPT: ...>> tags
+    if (!content) {
+       throw new Error("The AI returned an empty response. Please try a different topic.");
+    }
+
+    // 3. Parse and Generate Images for <<IMAGE_PROMPT: ...>> tags
     const imageTagRegex = /<<IMAGE_PROMPT:\s*(.*?)>>/g;
     const matches = [...content.matchAll(imageTagRegex)];
 
     if (matches.length > 0) {
-      // Process all images in parallel
       const imageReplacements = await Promise.all(
         matches.map(async (match) => {
           const fullTag = match[0];
@@ -128,20 +143,20 @@ BEGIN NOTES for (${request.topic}, ${request.grade}).`;
         })
       );
 
-      // Replace tags with Markdown Images
       for (const { fullTag, base64Image, prompt } of imageReplacements) {
         if (base64Image) {
           content = content.replace(fullTag, `\n\n![${prompt}](${base64Image})\n*Figure: ${prompt}*\n\n`);
         } else {
-          // If image generation failed, just remove the tag
           content = content.replace(fullTag, '');
         }
       }
     }
 
     return { content };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
-    throw new Error("Failed to connect to AI service.");
+    // Throw the REAL error message so the user sees it in the UI
+    const errorMessage = error.message || error.toString();
+    throw new Error(`AI Service Error: ${errorMessage}`);
   }
 };
