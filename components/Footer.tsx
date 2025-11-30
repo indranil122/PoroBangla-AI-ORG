@@ -82,9 +82,11 @@ const Footer: React.FC = () => {
             {/* Brand Info */}
             <div className="col-span-2 md:col-span-4 pr-0 md:pr-12">
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-gradient-to-tr from-violet-600 to-fuchsia-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-violet-900/20">
-                        <Zap size={20} fill="currentColor" />
-                    </div>
+                    <img 
+                      src="https://github.com/indranil122/image/blob/main/Gemini_Generated_Image_hc3ecmhc3ecmhc3e-Photoroom.png?raw=true" 
+                      alt="PoroBangla AI Logo"
+                      className="w-10 h-10 object-contain drop-shadow-md"
+                    />
                     <span className="font-bold text-2xl text-white tracking-tight">PoroBangla</span>
                 </div>
                 <p className="text-slate-500 text-sm leading-7 mb-8">

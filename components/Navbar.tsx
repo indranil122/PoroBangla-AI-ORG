@@ -64,13 +64,11 @@ const Navbar: React.FC = () => {
             onClick={() => navigate('/')}
             className="flex items-center gap-2 cursor-pointer group"
           >
-            <div className={`
-              relative flex items-center justify-center w-8 h-8 rounded-lg overflow-hidden transition-all duration-500
-              ${isScrolled ? 'bg-violet-600' : 'bg-white/10 group-hover:bg-white/20'}
-            `}>
-              <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 to-fuchsia-600 opacity-80"></div>
-              <Sparkles size={14} className="relative z-10 text-white" />
-            </div>
+            <img 
+              src="https://github.com/indranil122/image/blob/main/Gemini_Generated_Image_hc3ecmhc3ecmhc3e-Photoroom.png?raw=true" 
+              alt="PoroBangla AI Logo"
+              className="w-8 h-8 object-contain drop-shadow-lg"
+            />
             <span className={`
               font-bold tracking-tight transition-all duration-300
               ${isScrolled ? 'text-sm text-white' : 'text-lg text-white'}
