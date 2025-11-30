@@ -2,16 +2,38 @@ import { GoogleGenAI } from "@google/genai";
 import { NoteRequest, GeneratedNote } from "../types";
 
 /**
+ * Robustly retrieves the API Key from various environment locations.
+ * Vercel/Vite requires 'VITE_' prefix for browser access.
+ */
+const getApiKey = (): string | undefined => {
+  // 1. Check Vite standard (import.meta.env)
+  // @ts-ignore - import.meta might not be typed in all environments
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    // @ts-ignore
+    if (import.meta.env.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
+    // @ts-ignore
+    if (import.meta.env.API_KEY) return import.meta.env.API_KEY;
+  }
+
+  // 2. Check Standard Process Env (Node/CRA/Webpack)
+  if (typeof process !== 'undefined' && process.env) {
+    if (process.env.VITE_API_KEY) return process.env.VITE_API_KEY;
+    if (process.env.REACT_APP_API_KEY) return process.env.REACT_APP_API_KEY;
+    if (process.env.API_KEY) return process.env.API_KEY;
+  }
+
+  return undefined;
+};
+
+/**
  * Lazy initialization helper.
- * This ensures we only access process.env.API_KEY when a request is actually made.
  */
 const getAI = () => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = getApiKey();
   
-  // CRITICAL DEBUG CHECK
   if (!apiKey) {
-    console.error("API_KEY is missing from environment variables.");
-    throw new Error("Configuration Error: API_KEY is missing. Please check your Vercel Environment Variables.");
+    console.error("API Key not found. Checked: VITE_API_KEY, REACT_APP_API_KEY, API_KEY.");
+    throw new Error("Configuration Error: API Key is missing. In Vercel, please name your environment variable 'VITE_API_KEY' and Redeploy.");
   }
   
   return new GoogleGenAI({ apiKey });
@@ -155,7 +177,6 @@ BEGIN NOTES for (${request.topic}, ${request.grade}).`;
     return { content };
   } catch (error: any) {
     console.error("Gemini API Error:", error);
-    // Throw the REAL error message so the user sees it in the UI
     const errorMessage = error.message || error.toString();
     throw new Error(`AI Service Error: ${errorMessage}`);
   }
