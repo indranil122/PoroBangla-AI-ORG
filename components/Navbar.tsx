@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
   const navVariants = {
     top: { 
       width: "100%", 
-      maxWidth: "100%", // Explicit start value
+      maxWidth: "100vw", // FIX: Use 100vw to ensure it always interpolates correctly from 800px
       y: 0, 
       borderRadius: "0px",
       backgroundColor: "rgba(5, 5, 7, 0)",
@@ -31,7 +31,8 @@ const Navbar: React.FC = () => {
       paddingTop: "1.5rem",
       paddingBottom: "1.5rem",
       backdropFilter: "blur(0px)",
-      boxShadow: "0 0 0 0 rgba(0,0,0,0)"
+      boxShadow: "0 0 0 0 rgba(0,0,0,0)",
+      transform: "translateZ(0)" // Force hardware acceleration
     },
     scrolled: { 
       width: "90%", 
@@ -43,7 +44,8 @@ const Navbar: React.FC = () => {
       paddingTop: "0.75rem",
       paddingBottom: "0.75rem",
       backdropFilter: "blur(16px)",
-      boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)"
+      boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)",
+      transform: "translateZ(0)" // Force hardware acceleration
     }
   };
 
