@@ -149,9 +149,11 @@ const Footer: React.FC = () => {
             <p>© 2024 PoroBangla AI. All rights reserved.</p>
             <a href="#" className="flex items-center gap-2 font-medium text-secondary-dark hover:text-primary transition-colors cursor-pointer">
               <span>Powered by</span>
-              <svg width="20" height="20" viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path d="M512 0C229.2 0 0 229.2 0 512s229.2 512 512 512 512-229.2 512-512S794.8 0 512 0z m288 608l-128-128-160 160-160-160-128 128V320h608v288z"/>
-              </svg>
+              <img 
+                src="https://github.com/indranil122/image/blob/main/MyndraLogoWB.png?raw=true" 
+                alt="Myndra AI"
+                className="w-5 h-5 object-contain"
+              />
               <span className="font-bold">Myndra AI</span>
             </a>
         </div>

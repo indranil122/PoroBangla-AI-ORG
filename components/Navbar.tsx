@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sparkles, Menu, X, ArrowRight, Zap } from 'lucide-react';
+import { Menu, X, ArrowRight, Zap } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -84,10 +84,12 @@ const Navbar: React.FC = () => {
                 transition={{ duration: 0.3, ease: 'easeOut' }}
                 className="pl-10 -mt-1"
               >
-                <div className="flex items-center gap-1.5 text-secondary-dark group-hover:text-primary transition-colors">
-                  <svg width="12" height="12" viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M512 0C229.2 0 0 229.2 0 512s229.2 512 512 512 512-229.2 512-512S794.8 0 512 0z m288 608l-128-128-160 160-160-160-128 128V320h608v288z"/>
-                  </svg>
+                <div className="flex items-center gap-2 text-secondary-dark group-hover:text-primary transition-colors">
+                  <img 
+                    src="https://github.com/indranil122/image/blob/main/MyndraLogoWB.png?raw=true" 
+                    alt="Myndra AI"
+                    className="w-3 h-3 object-contain opacity-80"
+                  />
                   <span className="text-[10px] font-bold tracking-wider">Powered by Myndra AI</span>
                 </div>
               </motion.div>
