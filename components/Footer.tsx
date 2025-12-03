@@ -1,34 +1,55 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Github, Twitter, Linkedin, Zap } from 'lucide-react';
+import { ArrowUpRight, Github, Twitter, Linkedin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SocialIcon = ({ icon: Icon, href }: { icon: any, href: string }) => (
   <a 
     href={href}
-    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-secondary-dark hover:text-white hover:bg-white/10 transition-all duration-300 border border-white/5 hover:scale-110 hover:border-primary/50"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-secondary-dark hover:text-primary hover:bg-primary/10 transition-all duration-300 border border-white/5 hover:scale-110 hover:border-primary/50"
   >
     <Icon size={18} />
   </a>
 );
 
+// Stagger variant for individual links
+const linkVariants = {
+  hidden: { opacity: 0, x: -15 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } }
+};
+
 const FooterLink: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <motion.li variants={{ hidden: { opacity: 0, x: -10 }, visible: { opacity: 1, x: 0 } }}>
+  <motion.li variants={linkVariants}>
     <a href="#" className="text-secondary-dark hover:text-primary transition-colors text-sm font-medium flex items-center gap-2 group">
-      <span className="w-0 h-[1px] bg-primary transition-all duration-300 group-hover:w-3"></span>
+      {/* Animated underline effect */}
+      <span className="w-0 h-[1px] bg-primary transition-all duration-300 group-hover:w-4"></span>
       {children}
     </a>
   </motion.li>
 );
 
+// Stagger container for the list
+const columnVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
 const FooterColumn = ({ title, links }: { title: string, links: string[] }) => (
   <div className="space-y-6">
     <h3 className="text-sm font-bold text-white uppercase tracking-widest opacity-80">{title}</h3>
     <motion.ul 
+      variants={columnVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true }}
-      transition={{ staggerChildren: 0.1 }}
+      viewport={{ once: true, amount: 0.5 }}
       className="space-y-4"
     >
       {links.map(link => <FooterLink key={link}>{link}</FooterLink>)}
@@ -67,10 +88,10 @@ const Footer: React.FC = () => {
             </div>
             
             <motion.button 
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, boxShadow: "0 0 40px -10px rgba(255, 255, 255, 0.4)" }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/generate')}
-                className="mt-10 md:mt-0 group flex items-center gap-3 px-10 py-5 bg-white text-black rounded-full font-bold text-lg hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.4)] transition-all duration-300"
+                className="mt-10 md:mt-0 group flex items-center gap-3 px-10 py-5 bg-white text-black rounded-full font-bold text-lg transition-all duration-300"
             >
                 Launch Generator <ArrowUpRight className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" strokeWidth={2.5} />
             </motion.button>
@@ -104,7 +125,7 @@ const Footer: React.FC = () => {
 
             {/* Columns */}
             <div className="col-span-1 md:col-span-2">
-                <FooterColumn title="Product" links={['Generator', 'Templates', 'Showcase', 'Pricing']} />
+                <FooterColumn title="Product" links={['Generator', 'Flashcards', 'Showcase', 'Pricing']} />
             </div>
             <div className="col-span-1 md:col-span-2">
                 <FooterColumn title="Resources" links={['Documentation', 'API Reference', 'Community', 'Help']} />
@@ -127,8 +148,8 @@ const Footer: React.FC = () => {
             <h1 className="text-[15vw] md:text-[13vw] font-black text-center text-[#F3C567]/[0.05] tracking-tighter leading-[0.8] py-4 select-none transition-all duration-700 group-hover:text-[#F3C567]/[0.1] group-hover:scale-105">
                 POROBANGLA
             </h1>
-            {/* Hover Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F3C567]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none mix-blend-overlay"></div>
+            {/* Interactive Hover Glow Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F3C567]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none mix-blend-soft-light"></div>
         </motion.div>
       </div>
       
