@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Github, Twitter, Linkedin } from 'lucide-react';
+import { ArrowUpRight, Github, Twitter, Linkedin, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SocialIcon = ({ icon: Icon, href }: { icon: any, href: string }) => (
@@ -56,6 +56,24 @@ const FooterColumn = ({ title, links }: { title: string, links: string[] }) => (
     </motion.ul>
   </div>
 );
+
+const MarqueeItem = () => (
+    <div className="flex items-center shrink-0 gap-8 mx-4">
+        <h1 className="text-[10vw] md:text-[8vw] font-black tracking-tighter leading-[0.8] py-4 select-none whitespace-nowrap
+                       text-transparent [-webkit-text-stroke:1px_theme(colors.primary/0.2)]
+                       group-hover:[-webkit-text-stroke:1px_theme(colors.primary)] group-hover:text-primary/10 transition-all duration-700 ease-in-out">
+            POROBANGLA AI
+        </h1>
+        <Sparkles className="w-[8vw] h-[8vw] md:w-[6vw] md:h-[6vw] text-primary/20 group-hover:text-primary transition-colors duration-700" strokeWidth={1} />
+        <h1 className="text-[10vw] md:text-[8vw] font-black tracking-tighter leading-[0.8] py-4 select-none whitespace-nowrap
+                       text-transparent [-webkit-text-stroke:1px_theme(colors.primary/0.2)]
+                       group-hover:[-webkit-text-stroke:1px_theme(colors.primary)] group-hover:text-primary/10 transition-all duration-700 ease-in-out">
+            LEARN FASTER
+        </h1>
+        <Sparkles className="w-[8vw] h-[8vw] md:w-[6vw] md:h-[6vw] text-primary/20 group-hover:text-primary transition-colors duration-700" strokeWidth={1} />
+    </div>
+);
+
 
 const Footer: React.FC = () => {
   const navigate = useNavigate();
@@ -137,19 +155,18 @@ const Footer: React.FC = () => {
 
       </div>
 
-      {/* GIANT BRAND WATERMARK */}
-      <div className="w-full border-t border-secondary/5 bg-white/[0.02] overflow-hidden group cursor-default">
-        <motion.div 
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-[1920px] mx-auto relative"
+      {/* DYNAMIC SCROLLING MARQUEE */}
+      <div className="w-full border-t border-secondary/10 bg-black/50 overflow-hidden group cursor-default">
+        <motion.div
+            className="flex"
+            initial={{ x: "0%" }}
+            animate={{ x: "-100%" }}
+            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
         >
-            <h1 className="text-[15vw] md:text-[13vw] font-black text-center text-[#F3C567]/[0.05] tracking-tighter leading-[0.8] py-4 select-none transition-all duration-700 group-hover:text-[#F3C567]/[0.1] group-hover:scale-105">
-                POROBANGLA
-            </h1>
-            {/* Interactive Hover Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F3C567]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none mix-blend-soft-light"></div>
+            <MarqueeItem />
+            <MarqueeItem />
+            <MarqueeItem />
+            <MarqueeItem />
         </motion.div>
       </div>
       
