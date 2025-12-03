@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Sparkles, AlertCircle, Layers, GraduationCap, Settings, Type, LayoutTemplate, X, ArrowLeft, Languages, BrainCircuit } from 'lucide-react';
+import { Loader2, Sparkles, AlertCircle, Layers, GraduationCap, Settings, Type, LayoutTemplate, X, ArrowLeft, Languages, BrainCircuit, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { NoteLanguage, NoteRequest } from '../types';
 import { generateNotes, generateFlashcards } from '../services/geminiService';
 import { createDeckFromAI } from '../services/flashcardService';
 import Notebook, { NotebookSettings } from '../components/Notebook';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 const Generator: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<'input' | 'result'>('input');
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<NoteRequest>({
     topic: '',
@@ -61,6 +64,45 @@ const Generator: React.FC = () => {
         setIsGeneratingDeck(false);
     }
   };
+
+  const handleExportPDF = async () => {
+    const element = document.getElementById('printable-notebook');
+    if (!element) return;
+
+    setIsExporting(true);
+
+    try {
+      // Capture the element as a high-quality canvas, preserving the theme
+      const canvas = await html2canvas(element, {
+        scale: 2, // High resolution capture
+        useCORS: true,
+        backgroundColor: '#0F0F0F', // Preserve dark theme background
+        logging: false
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      // Create a PDF with dimensions that match the captured image
+      // This preserves the exact "digital note" look on a single long page
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [imgWidth, imgHeight]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`${formData.topic.replace(/[^a-z0-9]/gi, '_')}_PoroBangla.pdf`);
+
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Could not export PDF. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
 
   return (
     <div className="relative min-h-screen w-full z-10 flex flex-col pt-24 md:pt-32 pb-12 overflow-x-hidden">
@@ -366,9 +408,11 @@ const Generator: React.FC = () => {
                         </button>
 
                         <button 
-                            onClick={() => window.print()}
+                            onClick={handleExportPDF}
+                            disabled={isExporting}
                             className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#D8A441] to-[#F3C567] text-black hover:brightness-110 transition-all text-sm font-semibold shadow-lg shadow-[#D8A441]/20 flex items-center gap-2"
                         >
+                            {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                             Export PDF
                         </button>
                     </div>
