@@ -4,18 +4,19 @@ import { NoteRequest, GeneratedNote } from "../types";
 /**
  * Lazy initialization helper.
  */
-// FIX: Simplified AI client initialization to directly use process.env.API_KEY as per guidelines.
 const getAI = () => {
-  const apiKey = process.env.API_KEY;
+  // FIX: Using import.meta.env and the correct variable name for Vite applications.
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  
   if (!apiKey) {
-    console.error("Configuration Error: API Key is missing. Please ensure the API_KEY environment variable is set.");
-    throw new Error("Configuration Error: API Key is missing. Please ensure the API_KEY environment variable is set.");
+    console.error("Configuration Error: API Key is missing. Please ensure the VITE_GEMINI_API_KEY environment variable is set.");
+    throw new Error("Configuration Error: API Key is missing. Please ensure the VITE_GEMINI_API_KEY environment variable is set.");
   }
   return new GoogleGenAI({ apiKey });
 };
 
 /**
- * Generates a diagram/image using the nano banana model.
+ * Generates a diagram/image using the image model.
  */
 async function generateDiagram(prompt: string): Promise<string | null> {
   try {
@@ -49,7 +50,6 @@ async function generateDiagram(prompt: string): Promise<string | null> {
 /**
  * Generates Flashcards JSON from note content.
  */
-// FIX: Updated to use responseSchema for reliable JSON output, removing fragile string parsing.
 export const generateFlashcards = async (noteContent: string, topic: string): Promise<{front: string, back: string}[]> => {
   const modelId = 'gemini-2.5-flash';
   
@@ -148,7 +148,7 @@ DIAGRAMS & VISUALS:
 If a visual diagram, chart, or scientific picture is REQUIRED to explain a concept (e.g. "Structure of an Atom", "Circuit Diagram", "Flowchart of Process"):
 1. You must create a REALISTIC PROMPT for an image generation model.
 2. Insert a placeholder tag in this EXACT format:
-   <<IMAGE_PROMPT: A detailed, educational diagram showing [description]>>
+   <<IMAGE_PROMPT: A detailed, educational diagram showing [description]>>
 3. Do not use this for simple decorative images. Only for educational value.
 4. Limit to maximum 1-2 diagrams per note.
 
@@ -158,8 +158,8 @@ Structured Layout & Formatting (in Markdown):
 - Use hierarchical headings: #, ##, ###.
 - Provide a table of contents.
 - Use LaTeX for ALL mathematical/chemical formulas (Always use default dark color, never white).
-  - Inline: $ equation $
-  - Block: $$ equation $$
+  - Inline: $ equation $
+  - Block: $$ equation $$
 - Use code blocks for all code examples.
 - Use callout boxes (Definition:, Important:).
 
@@ -182,7 +182,7 @@ BEGIN NOTES for (${request.topic}, ${request.grade}).`;
     let content = response.text;
 
     if (!content) {
-       throw new Error("The AI returned an empty response. Please try a different topic.");
+        throw new Error("The AI returned an empty response. Please try a different topic.");
     }
 
     // Parse and Generate Images for <<IMAGE_PROMPT: ...>> tags
