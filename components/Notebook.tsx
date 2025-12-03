@@ -102,7 +102,7 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
       {/* The Dark Luxury Card (Screen) vs White Paper (Print) */}
       <div id="printable-notebook" className="relative bg-[#0F0F0F] border border-secondary/10 rounded-lg shadow-2xl overflow-hidden min-h-[800px] print:shadow-none print:rounded-none print:bg-white print:border-none print:overflow-visible">
         
-        {/* Top Accent Line - Gold Gradient */}
+        {/* Top Accent Line - Gold Gradient (Web Only) */}
         <div className="h-1.5 w-full bg-gradient-to-r from-[#D8A441] via-[#F3C567] to-[#D8A441] print:hidden"></div>
 
         {/* Save Button (Web Only) */}
@@ -134,8 +134,8 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
             </AnimatePresence>
         </button>
 
-        {/* PRINT ONLY HEADER - Visible only on paper */}
-        <div className="hidden print:block border-b-2 border-black mb-8 pb-4 pt-4 px-0">
+        {/* PRINT ONLY HEADER */}
+        <div className="hidden print:block border-b-2 border-black mb-8 pb-4 pt-4">
             <div className="flex justify-between items-end mb-2">
                 <h1 className="text-3xl font-bold text-black leading-tight uppercase tracking-tight">{title}</h1>
                 <span className="text-sm font-mono text-gray-500">{new Date().toLocaleDateString()}</span>
@@ -152,26 +152,17 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
                 remarkPlugins={[remarkMath]}
                 rehypePlugins={[rehypeKatex]}
                 components={{
-                    // Elegant Typography - Gold Headers for Screen
                     h1: ({node, ...props}) => <h1 className={`${heading1Size} font-bold tracking-tight text-primary mb-8 mt-4 pb-4 border-b border-secondary/20 break-after-avoid print:text-2xl print:mb-4 print:mt-6 print:border-black print:text-black`} {...props} />,
                     h2: ({node, ...props}) => <h2 className="text-2xl font-semibold text-secondary-light mt-10 mb-4 flex items-center gap-2 break-after-avoid print:text-xl print:text-black print:mt-6 print:mb-2" {...props} />,
                     h3: ({node, ...props}) => <h3 className="text-xl font-medium text-primary mt-6 mb-3 break-after-avoid print:text-lg print:text-black print:font-bold" {...props} />,
-                    
-                    // Lists
                     ul: ({node, ...props}) => <ul className="list-none list-outside ml-2 space-y-2 mb-6 text-secondary print:mb-2 print:text-black" {...props} />,
                     ol: ({node, ...props}) => <ol className="list-decimal list-outside ml-6 space-y-2 mb-6 text-secondary marker:text-secondary-dark marker:font-medium pl-2 print:mb-2 print:marker:text-black print:text-black" {...props} />,
-                    
-                    // List Item with Checkbox
                     li: ListItem,
-                    
-                    // Emphasis
                     strong: ({node, ...props}) => <strong className="font-semibold text-primary print:text-black print:font-bold" {...props} />,
                     blockquote: ({node, ...props}) => (
                         <blockquote className="border-l-4 border-primary pl-6 italic text-secondary-dark my-8 py-2 bg-primary/5 rounded-r-lg print:bg-transparent print:border-l-2 print:border-black print:text-black print:pl-4 print:my-4 print:italic" {...props} />
                     ),
                     p: ({node, ...props}) => <p className="mb-6 text-secondary leading-8 print:mb-3 print:text-black print:leading-normal" {...props} />,
-                    
-                    // Responsive Tables
                     table: ({node, ...props}) => (
                         <div className="overflow-x-auto my-8 rounded-lg border border-secondary/20 shadow-sm print:shadow-none print:border print:border-black print:my-4 print:rounded-none">
                             <table className="w-full table-fixed min-w-full divide-y divide-secondary/20 bg-transparent print:divide-black" {...props} />
@@ -181,8 +172,6 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
                     th: ({node, ...props}) => <th className="px-6 py-4 text-left text-xs font-bold text-secondary-dark uppercase tracking-wider border-b border-secondary/20 print:text-black print:px-3 print:py-2 print:border-black" {...props} />,
                     td: ({node, ...props}) => <td className="px-6 py-4 text-sm text-secondary leading-relaxed border-t border-secondary/10 align-top break-words print:text-black print:px-3 print:py-2 print:border-t print:border-gray-300" {...props} />,
                     tr: ({node, ...props}) => <tr className="hover:bg-white/5 transition-colors print:hover:bg-transparent" {...props} />,
-
-                    // Images (Diagrams)
                     img: ({node, ...props}) => (
                       <div className="my-8 flex flex-col items-center break-inside-avoid print:my-4">
                         <div className="relative group overflow-hidden rounded-xl border border-secondary/20 shadow-lg print:shadow-none print:border print:border-black print:rounded-none">
@@ -199,16 +188,14 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
                         )}
                       </div>
                     ),
-
-                    // Code - JetBrains Mono style
                     code: (props: any) => {
                       const { node, inline, className, children, ...rest } = props;
                       if (inline) {
-                         return <code className={`font-mono text-[0.9em] bg-white/10 text-primary px-1.5 py-0.5 rounded border border-secondary/20 ${className || ''} print:bg-transparent print:text-black print:border-none print:font-bold print:px-0`} {...rest}>{children}</code>;
+                         return <code className={`font-mono text-[0.9em] bg-white/10 text-primary px-1.5 py-0.5 rounded border border-secondary/20 ${className || ''} print:bg-gray-200 print:text-black print:border-gray-300 print:font-normal`} {...rest}>{children}</code>;
                       }
                       return (
-                         <div className="my-6 rounded-xl overflow-hidden border border-secondary/20 shadow-sm bg-[#050505] print:bg-white print:border print:border-black print:shadow-none print:rounded-none print:my-4 break-inside-avoid">
-                             <div className="flex items-center px-4 py-2 bg-[#0A0A0A] border-b border-secondary/20 print:bg-gray-100 print:border-black print:py-1">
+                         <div className="my-6 rounded-xl overflow-hidden border border-secondary/20 shadow-sm bg-[#050505] print:bg-gray-100 print:border print:border-gray-300 print:shadow-none print:rounded-none print:my-4 break-inside-avoid">
+                             <div className="flex items-center px-4 py-2 bg-[#0A0A0A] border-b border-secondary/20 print:bg-gray-200 print:border-gray-300 print:py-1">
                                  <div className="flex gap-1.5 print:hidden">
                                      <div className="w-3 h-3 rounded-full bg-[#8A8F94]/50"></div>
                                      <div className="w-3 h-3 rounded-full bg-[#D8A441]/50"></div>
@@ -221,8 +208,6 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
                       );
                     },
                     pre: ({node, ...props}) => <pre className="not-prose" {...props} />,
-                    
-                    // Divider
                     hr: ({node, ...props}) => <hr className="border-t border-secondary/20 my-10 print:my-6 print:border-black" {...props} />,
                 }}
             >

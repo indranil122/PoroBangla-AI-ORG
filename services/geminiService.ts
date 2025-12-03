@@ -1,48 +1,16 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { NoteRequest, GeneratedNote } from "../types";
-
-/**
- * Robustly retrieves the API Key from various environment locations.
- * Vercel/Vite usually requires 'VITE_' prefix for browser access.
- */
-const getApiKey = (): string | undefined => {
-  // 1. Check Vite standard (import.meta.env)
-  // @ts-ignore
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    // @ts-ignore
-    if (import.meta.env.GEMINI_API_KEY) return import.meta.env.GEMINI_API_KEY;
-    // @ts-ignore
-    if (import.meta.env.VITE_GEMINI_API_KEY) return import.meta.env.VITE_GEMINI_API_KEY;
-    // @ts-ignore
-    if (import.meta.env.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
-    // @ts-ignore
-    if (import.meta.env.API_KEY) return import.meta.env.API_KEY;
-  }
-
-  // 2. Check Standard Process Env (Node/CRA/Webpack/Vercel)
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
-    if (process.env.VITE_GEMINI_API_KEY) return process.env.VITE_GEMINI_API_KEY;
-    if (process.env.REACT_APP_API_KEY) return process.env.REACT_APP_API_KEY;
-    if (process.env.API_KEY) return process.env.API_KEY;
-  }
-
-  return undefined;
-};
 
 /**
  * Lazy initialization helper.
  */
+// FIX: Simplified AI client initialization to directly use process.env.API_KEY as per guidelines.
 const getAI = () => {
-  const apiKey = getApiKey();
-  
+  const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    console.error("API Key not found. Checked: GEMINI_API_KEY, VITE_GEMINI_API_KEY, VITE_API_KEY.");
-    throw new Error(
-      "Configuration Error: API Key is missing. If using Vercel, try renaming your variable to 'VITE_GEMINI_API_KEY' in the dashboard and redeploying."
-    );
+    console.error("Configuration Error: API Key is missing. Please ensure the API_KEY environment variable is set.");
+    throw new Error("Configuration Error: API Key is missing. Please ensure the API_KEY environment variable is set.");
   }
-  
   return new GoogleGenAI({ apiKey });
 };
 
@@ -81,6 +49,7 @@ async function generateDiagram(prompt: string): Promise<string | null> {
 /**
  * Generates Flashcards JSON from note content.
  */
+// FIX: Updated to use responseSchema for reliable JSON output, removing fragile string parsing.
 export const generateFlashcards = async (noteContent: string, topic: string): Promise<{front: string, back: string}[]> => {
   const modelId = 'gemini-2.5-flash';
   
@@ -95,14 +64,7 @@ export const generateFlashcards = async (noteContent: string, topic: string): Pr
   const prompt = `
     Analyze the following academic notes on the topic "${topic}".
     Create 10 to 15 high-quality flashcards for a student to study.
-    
-    Format requirements:
-    - Return ONLY a raw JSON array.
-    - Each object must have "front" (question/term) and "back" (answer/definition).
-    - Keep "front" concise.
-    - Keep "back" clear and accurate.
-    - No Markdown formatting around the JSON (no \`\`\`json).
-    - Do not include any introductory text.
+    Each flashcard must have a "front" (a question or term) and a "back" (the corresponding answer or definition).
     
     Notes content:
     ${noteContent.substring(0, 8000)} // Limit context to avoid token limits
@@ -112,22 +74,34 @@ export const generateFlashcards = async (noteContent: string, topic: string): Pr
     const response = await ai.models.generateContent({
       model: modelId,
       contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              front: {
+                type: Type.STRING,
+                description: "The question or term on the front of the flashcard."
+              },
+              back: {
+                type: Type.STRING,
+                description: "The answer or definition on the back of the flashcard."
+              },
+            },
+            required: ["front", "back"],
+          },
+        },
+      },
     });
     
-    let text = response.text || "[]";
-    // Clean up if the model adds markdown code blocks despite instructions
-    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    
-    // Attempt to find JSON array if extra text exists
-    const jsonMatch = text.match(/\[.*\]/s);
-    if (jsonMatch) {
-      text = jsonMatch[0];
-    }
-    
+    const text = response.text || "[]";
     return JSON.parse(text);
+
   } catch (error) {
     console.error("Flashcard Generation Error:", error);
-    throw new Error("Failed to generate flashcards.");
+    throw new Error("Failed to generate flashcards. The AI response might be malformed.");
   }
 };
 

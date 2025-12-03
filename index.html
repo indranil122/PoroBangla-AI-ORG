@@ -123,7 +123,7 @@
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
       }
 
-      /* PRINT OPTIMIZATIONS - STRICT OVERRIDES */
+      /* PRINT OPTIMIZATIONS - STRICT FIX */
       @media print {
         @page {
           margin: 1.5cm;
@@ -137,38 +137,32 @@
           padding: 0 !important;
         }
 
-        /* Allow multi-page printing */
+        /* Allow multi-page printing by removing all height/overflow constraints */
         html, body, #root {
           height: auto !important;
           overflow: visible !important;
           display: block !important;
         }
 
-        /* Hide global UI elements rigorously */
-        nav, footer, .fixed, .absolute, button, .glass-panel, .animate-spin, video, canvas, iframe, .z-10, .bg-background {
+        /* Hide ALL UI elements that are not part of the printable content */
+        nav, footer, .fixed, .absolute:not(#printable-notebook), button, .glass-panel, .animate-spin, video, canvas, iframe, .z-10, [class*="bg-background"] {
           display: none !important;
           opacity: 0 !important;
           visibility: hidden !important;
         }
-
-        [class*="gradient"], [class*="aurora"], [class*="noise"] {
+        
+        /* Hide animations and decorative backgrounds */
+        [class*="gradient"], [class*="aurora"], [class*="noise"], .bg-background {
           display: none !important;
         }
 
-        /* Visibility Approach: Show ONLY the notebook */
-        body * {
-          visibility: hidden;
+        /* Isolate the notebook content as the ONLY visible thing */
+        body > #root > div > div:not(:has(#printable-notebook)) {
+            display: none !important;
         }
-
-        #printable-notebook, #printable-notebook * {
-          visibility: visible;
-        }
-
-        /* Positioning: Reset the notebook to normal document flow for print */
+        
         #printable-notebook {
-          position: absolute;
-          left: 0;
-          top: 0;
+          position: static !important; /* CRITICAL: Remove absolute positioning */
           width: 100% !important;
           max-width: none !important;
           margin: 0 !important;
@@ -176,15 +170,15 @@
           background: white !important;
           box-shadow: none !important;
           border: none !important;
-          overflow: visible !important;
+          overflow: visible !important; /* CRITICAL: Allow content to flow across pages */
         }
-
-        /* Force colors back to Black/White for Print */
+        
+        /* Ensure text is black and readable */
         h1, h2, h3, h4, h5, h6, p, li, span, div, td, th, strong, em {
           color: black !important;
         }
         
-        /* Ensure KaTeX is black in print */
+        /* Ensure math formulas are black for print */
         .katex, .katex .katex-html, .katex * {
            color: black !important;
         }

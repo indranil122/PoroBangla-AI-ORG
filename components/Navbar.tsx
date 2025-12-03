@@ -57,22 +57,42 @@ const Navbar: React.FC = () => {
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="pointer-events-auto flex items-center justify-between px-6 md:px-8 border"
         >
-          {/* Logo */}
+          {/* Logo and Tagline */}
           <div 
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 cursor-pointer group"
+            className="flex flex-col items-start cursor-pointer group"
           >
-            <img 
-              src="https://github.com/indranil122/image/blob/main/Gemini_Generated_Image_hc3ecmhc3ecmhc3e-Photoroom.png?raw=true" 
-              alt="PoroBangla AI Logo"
-              className="w-8 h-8 object-contain drop-shadow-lg"
-            />
-            <span className={`
-              font-bold tracking-tight transition-all duration-300
-              ${isScrolled ? 'text-sm text-secondary' : 'text-lg text-secondary'}
-            `}>
-              PoroBangla<span className="text-primary">AI</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <img 
+                src="https://github.com/indranil122/image/blob/main/Gemini_Generated_Image_hc3ecmhc3ecmhc3e-Photoroom.png?raw=true" 
+                alt="PoroBangla AI Logo"
+                className="w-8 h-8 object-contain drop-shadow-lg"
+              />
+              <span className={`
+                font-bold tracking-tight transition-all duration-300
+                ${isScrolled ? 'text-sm text-secondary' : 'text-lg text-secondary'}
+              `}>
+                PoroBangla<span className="text-primary">AI</span>
+              </span>
+            </div>
+            <AnimatePresence>
+            {!isScrolled && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="pl-10 -mt-1"
+              >
+                <div className="flex items-center gap-1.5 text-secondary-dark group-hover:text-primary transition-colors">
+                  <svg width="12" height="12" viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M512 0C229.2 0 0 229.2 0 512s229.2 512 512 512 512-229.2 512-512S794.8 0 512 0z m288 608l-128-128-160 160-160-160-128 128V320h608v288z"/>
+                  </svg>
+                  <span className="text-[10px] font-bold tracking-wider">Powered by Myndra AI</span>
+                </div>
+              </motion.div>
+            )}
+            </AnimatePresence>
           </div>
 
           {/* Desktop Links (Center) */}

@@ -1,9 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+// FIX: The `Variants` type from Framer Motion is used to correctly type the animation variants object. This resolves a TypeScript error where the `type` property was being inferred as a generic `string` instead of the required literal type ('spring').
+import { motion, Variants } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Layers, BrainCircuit, Trash2, ArrowRight, Play, Clock, Plus } from 'lucide-react';
 import { Deck } from '../types';
 import { getDecks, deleteDeck } from '../services/flashcardService';
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: 'spring', stiffness: 100 },
+  },
+};
 
 const FlashcardDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -66,7 +86,12 @@ const FlashcardDashboard: React.FC = () => {
         </div>
       ) : (
         /* Deck Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
           {decks.map((deck) => {
             const dueCount = getDueCount(deck);
             const totalCards = deck.cards.length;
@@ -75,8 +100,7 @@ const FlashcardDashboard: React.FC = () => {
             return (
               <motion.div
                 key={deck.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                variants={itemVariants}
                 whileHover={{ y: -8 }}
                 onClick={() => navigate(`/study/${deck.id}`)}
                 className="group relative bg-[#0F0F0F] border border-white/5 hover:border-primary/30 rounded-[2rem] p-8 cursor-pointer transition-all duration-300 shadow-xl hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] overflow-hidden"
@@ -127,7 +151,7 @@ const FlashcardDashboard: React.FC = () => {
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       )}
     </div>
   );
