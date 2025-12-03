@@ -2,21 +2,53 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { NoteRequest, GeneratedNote } from "../types";
 
 /**
+ * Robustly retrieves the API Key from various environment locations.
+ * Safe access prevents "Cannot read properties of undefined" errors.
+ */
+const getApiKey = (): string | undefined => {
+  let key: string | undefined;
+
+  // 1. Try Vite standard (import.meta.env)
+  try {
+    // @ts-ignore
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      // @ts-ignore
+      key = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY || import.meta.env.GEMINI_API_KEY || import.meta.env.API_KEY;
+    }
+  } catch (e) {
+    // Ignore errors if import.meta is not available
+  }
+
+  if (key) return key;
+
+  // 2. Try Standard Process Env (Node/CRA/Webpack/Vercel)
+  try {
+    if (typeof process !== 'undefined' && process.env) {
+      key = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.VITE_API_KEY || process.env.REACT_APP_API_KEY || process.env.API_KEY;
+    }
+  } catch (e) {
+    // Ignore errors if process is not available
+  }
+
+  return key;
+};
+
+/**
  * Lazy initialization helper.
  */
 const getAI = () => {
-  // FIX: Using import.meta.env and the correct variable name for Vite applications.
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = getApiKey();
   
   if (!apiKey) {
-    console.error("Configuration Error: API Key is missing. Please ensure the VITE_GEMINI_API_KEY environment variable is set.");
-    throw new Error("Configuration Error: API Key is missing. Please ensure the VITE_GEMINI_API_KEY environment variable is set.");
+    console.error("Configuration Error: API Key is missing. Checked VITE_GEMINI_API_KEY, GEMINI_API_KEY, VITE_API_KEY, API_KEY.");
+    throw new Error("Configuration Error: API Key is missing. Please check your environment variables.");
   }
+  
   return new GoogleGenAI({ apiKey });
 };
 
 /**
- * Generates a diagram/image using the image model.
+ * Generates a diagram/image using the nano banana model.
  */
 async function generateDiagram(prompt: string): Promise<string | null> {
   try {
@@ -148,7 +180,7 @@ DIAGRAMS & VISUALS:
 If a visual diagram, chart, or scientific picture is REQUIRED to explain a concept (e.g. "Structure of an Atom", "Circuit Diagram", "Flowchart of Process"):
 1. You must create a REALISTIC PROMPT for an image generation model.
 2. Insert a placeholder tag in this EXACT format:
-   <<IMAGE_PROMPT: A detailed, educational diagram showing [description]>>
+   <<IMAGE_PROMPT: A detailed, educational diagram showing [description]>>
 3. Do not use this for simple decorative images. Only for educational value.
 4. Limit to maximum 1-2 diagrams per note.
 
@@ -158,8 +190,8 @@ Structured Layout & Formatting (in Markdown):
 - Use hierarchical headings: #, ##, ###.
 - Provide a table of contents.
 - Use LaTeX for ALL mathematical/chemical formulas (Always use default dark color, never white).
-  - Inline: $ equation $
-  - Block: $$ equation $$
+  - Inline: $ equation $
+  - Block: $$ equation $$
 - Use code blocks for all code examples.
 - Use callout boxes (Definition:, Important:).
 
