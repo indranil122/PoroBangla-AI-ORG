@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Sparkles, AlertCircle, Layers, GraduationCap, Settings, Type, LayoutTemplate, X, ArrowLeft, Languages, BrainCircuit, Download } from 'lucide-react';
+import { Loader2, Sparkles, AlertCircle, Layers, GraduationCap, Settings, Type, LayoutTemplate, X, ArrowLeft, Languages, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { NoteLanguage, NoteRequest } from '../types';
-import { generateNotes, generateFlashcards } from '../services/geminiService';
-import { createDeckFromAI } from '../services/flashcardService';
+import { generateNotes } from '../services/geminiService';
 import Notebook, { NotebookSettings } from '../components/Notebook';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -13,7 +12,6 @@ const Generator: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<'input' | 'result'>('input');
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<NoteRequest>({
@@ -48,23 +46,6 @@ const Generator: React.FC = () => {
     }
   };
 
-  const handleCreateDeck = async () => {
-    if (!generatedContent || !formData.topic) return;
-    
-    setIsGeneratingDeck(true);
-    try {
-        const cards = await generateFlashcards(generatedContent, formData.topic);
-        if (cards && cards.length > 0) {
-            createDeckFromAI(formData.topic, cards);
-            navigate('/flashcards');
-        }
-    } catch (e) {
-        alert("Failed to create flashcards. Please try again.");
-    } finally {
-        setIsGeneratingDeck(false);
-    }
-  };
-
   const handleExportPDF = async () => {
     const element = document.getElementById('printable-notebook');
     if (!element) return;
@@ -85,7 +66,6 @@ const Generator: React.FC = () => {
       const imgHeight = canvas.height;
 
       // Create a PDF with dimensions that match the captured image
-      // This preserves the exact "digital note" look on a single long page
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'px',
@@ -388,23 +368,6 @@ const Generator: React.FC = () => {
                             className="px-6 py-2.5 rounded-xl bg-white/5 text-secondary hover:bg-white/10 hover:text-white transition-colors text-sm font-semibold border border-white/10"
                         >
                             New Note
-                        </button>
-                        
-                        {/* Generate Flashcards Button (NEW) */}
-                        <button 
-                            onClick={handleCreateDeck}
-                            disabled={isGeneratingDeck}
-                            className={`px-6 py-2.5 rounded-xl bg-white/5 border border-primary/30 text-primary hover:bg-primary hover:text-black transition-all text-sm font-semibold flex items-center gap-2 ${isGeneratingDeck ? 'opacity-50 cursor-wait' : ''}`}
-                        >
-                            {isGeneratingDeck ? (
-                                <>
-                                  <Loader2 size={16} className="animate-spin" /> Generating...
-                                </>
-                            ) : (
-                                <>
-                                  <BrainCircuit size={16} /> Flashcards
-                                </>
-                            )}
                         </button>
 
                         <button 

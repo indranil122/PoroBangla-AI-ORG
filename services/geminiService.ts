@@ -1,49 +1,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { NoteRequest, GeneratedNote } from "../types";
+import { NoteRequest, GeneratedNote, MockTest, Question } from "../types";
 
-/**
- * Robustly retrieves the API Key from various environment locations.
- * Safe access prevents "Cannot read properties of undefined" errors.
- */
-const getApiKey = (): string | undefined => {
-  let key: string | undefined;
-
-  // 1. Try Vite standard (import.meta.env)
-  try {
-    // @ts-ignore
-    if (typeof import.meta !== 'undefined' && import.meta.env) {
-      // @ts-ignore
-      key = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY || import.meta.env.GEMINI_API_KEY || import.meta.env.API_KEY;
-    }
-  } catch (e) {
-    // Ignore errors if import.meta is not available
-  }
-
-  if (key) return key;
-
-  // 2. Try Standard Process Env (Node/CRA/Webpack/Vercel)
-  try {
-    if (typeof process !== 'undefined' && process.env) {
-      key = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.VITE_API_KEY || process.env.REACT_APP_API_KEY || process.env.API_KEY;
-    }
-  } catch (e) {
-    // Ignore errors if process is not available
-  }
-
-  return key;
-};
-
-/**
- * Lazy initialization helper.
- */
+// FIX: Simplified AI initialization to adhere to API key guidelines.
+// The API key must be obtained exclusively from `process.env.API_KEY`.
 const getAI = () => {
-  const apiKey = getApiKey();
-  
+  const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    console.error("Configuration Error: API Key is missing. Checked VITE_GEMINI_API_KEY, GEMINI_API_KEY, VITE_API_KEY, API_KEY.");
-    throw new Error("Configuration Error: API Key is missing. Please check your environment variables.");
+    const errorMsg = "Configuration Error: API_KEY environment variable is not set.";
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }
-  
   return new GoogleGenAI({ apiKey });
 };
 
@@ -80,26 +46,15 @@ async function generateDiagram(prompt: string): Promise<string | null> {
 }
 
 /**
- * Generates Flashcards JSON from note content.
+ * Generates a Mock Test with multiple-choice questions.
  */
-export const generateFlashcards = async (noteContent: string, topic: string): Promise<{front: string, back: string}[]> => {
+export const generateMockTest = async (topic: string, level: string, numQuestions: number): Promise<Question[]> => {
   const modelId = 'gemini-2.5-flash';
-  
-  // Validate AI Connection
-  let ai;
-  try {
-    ai = getAI();
-  } catch (e: any) {
-    throw new Error(e.message);
-  }
+  const ai = getAI();
 
   const prompt = `
-    Analyze the following academic notes on the topic "${topic}".
-    Create 10 to 15 high-quality flashcards for a student to study.
-    Each flashcard must have a "front" (a question or term) and a "back" (the corresponding answer or definition).
-    
-    Notes content:
-    ${noteContent.substring(0, 8000)} // Limit context to avoid token limits
+    Create a mock test with ${numQuestions} multiple-choice questions on the topic "${topic}" for a student at the "${level}" level.
+    For each question, provide 4 options, a correct answer index (0-3), and a brief explanation for the correct answer.
   `;
 
   try {
@@ -113,40 +68,52 @@ export const generateFlashcards = async (noteContent: string, topic: string): Pr
           items: {
             type: Type.OBJECT,
             properties: {
-              front: {
+              question: {
                 type: Type.STRING,
-                description: "The question or term on the front of the flashcard."
+                description: "The question text."
               },
-              back: {
+              options: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+                description: "An array of 4 possible answers."
+              },
+              correctAnswerIndex: {
+                type: Type.INTEGER,
+                description: "The 0-based index of the correct answer in the options array."
+              },
+              explanation: {
                 type: Type.STRING,
-                description: "The answer or definition on the back of the flashcard."
-              },
+                description: "A brief explanation of why the correct answer is right."
+              }
             },
-            required: ["front", "back"],
+            required: ["question", "options", "correctAnswerIndex", "explanation"],
           },
         },
       },
     });
-    
+
     const text = response.text || "[]";
-    return JSON.parse(text);
+    const questions = JSON.parse(text);
+
+    // Validate the structure
+    if (!Array.isArray(questions) || questions.some(q => q.options.length !== 4)) {
+      throw new Error("AI returned an invalid test format.");
+    }
+
+    return questions;
 
   } catch (error) {
-    console.error("Flashcard Generation Error:", error);
-    throw new Error("Failed to generate flashcards. The AI response might be malformed.");
+    console.error("Mock Test Generation Error:", error);
+    throw new Error("Failed to generate mock test. The AI response may have been malformed or blocked.");
   }
 };
+
 
 export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
   const modelId = 'gemini-2.5-flash';
   
-  // Validate AI Connection
-  let ai;
-  try {
-    ai = getAI();
-  } catch (e: any) {
-    throw new Error(e.message);
-  }
+  // FIX: Simplified AI initialization. The `getAI` function already handles errors.
+  const ai = getAI();
   
   const prompt = `You are an expert teacher and note-maker. The user has provided the following inputs:
 – Topic: "${request.topic}"

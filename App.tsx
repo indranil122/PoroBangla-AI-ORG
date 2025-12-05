@@ -1,13 +1,13 @@
 import React, { ReactNode } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
-// FIX: Framer Motion's `Transition` type is imported to correctly type the page transition configuration, resolving a TypeScript error where string literals were being inferred as the general `string` type.
 import { motion, AnimatePresence, Transition } from 'framer-motion';
 import AnimatedBackground from './components/AnimatedBackground';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Generator from './pages/Generator';
-import FlashcardDashboard from './pages/FlashcardDashboard';
-import StudySession from './pages/StudySession';
+import MockTestGenerator from './pages/MockTestGenerator';
+import TestSession from './pages/TestSession';
+import TestResult from './pages/TestResult';
 import ScrollEffectWrapper from './components/ScrollEffectWrapper';
 
 const pageVariants = {
@@ -31,7 +31,6 @@ const pageTransition: Transition = {
   duration: 0.5,
 };
 
-// FIX: Refactored to use a 'page' prop instead of 'children' to avoid a TypeScript inference issue with React Router's 'element' prop.
 const PageWrapper = ({ page }: { page: ReactNode }) => (
   <motion.div
     initial="initial"
@@ -51,8 +50,9 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageWrapper page={<Home />} />} />
         <Route path="/generate" element={<PageWrapper page={<Generator />} />} />
-        <Route path="/flashcards" element={<PageWrapper page={<FlashcardDashboard />} />} />
-        <Route path="/study/:id" element={<PageWrapper page={<StudySession />} />} />
+        <Route path="/mock-test" element={<PageWrapper page={<MockTestGenerator />} />} />
+        <Route path="/test-session" element={<TestSession />} />
+        <Route path="/test-result" element={<TestResult />} />
       </Routes>
     </AnimatePresence>
   );

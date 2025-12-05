@@ -1,5 +1,4 @@
 import React from 'react';
-// FIX: Framer Motion's `Variants` type is imported and applied to the `linkVariants` object. This ensures the `ease` property is correctly typed as a specific easing string literal ('easeOut') rather than the generic `string`, resolving the TypeScript error.
 import { motion, Variants } from 'framer-motion';
 import { ArrowUpRight, Github, Twitter, Linkedin, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -20,9 +19,9 @@ const linkVariants: Variants = {
   visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } }
 };
 
-const FooterLink: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const FooterLink: React.FC<{ children: React.ReactNode, href?: string }> = ({ children, href = "#" }) => (
   <motion.li variants={linkVariants}>
-    <a href="#" className="text-secondary-dark hover:text-primary transition-colors text-sm font-medium flex items-center gap-2 group">
+    <a href={href} className="text-secondary-dark hover:text-primary transition-colors text-sm font-medium flex items-center gap-2 group">
       <span className="w-0 h-[1px] bg-primary transition-all duration-300 group-hover:w-4"></span>
       {children}
     </a>
@@ -40,7 +39,7 @@ const columnVariants = {
   },
 };
 
-const FooterColumn = ({ title, links }: { title: string, links: string[] }) => (
+const FooterColumn = ({ title, links }: { title: string, links: { name: string, href?: string }[] }) => (
   <div className="space-y-6">
     <h3 className="text-sm font-bold text-white uppercase tracking-widest opacity-80">{title}</h3>
     <motion.ul 
@@ -50,7 +49,7 @@ const FooterColumn = ({ title, links }: { title: string, links: string[] }) => (
       viewport={{ once: true, amount: 0.5 }}
       className="space-y-4"
     >
-      {links.map(link => <FooterLink key={link}>{link}</FooterLink>)}
+      {links.map(link => <FooterLink key={link.name} href={link.href}>{link.name}</FooterLink>)}
     </motion.ul>
   </div>
 );
@@ -58,7 +57,7 @@ const FooterColumn = ({ title, links }: { title: string, links: string[] }) => (
 const MarqueeItem = () => (
     <div className="flex items-center gap-8 mx-4">
         <Sparkles size={24} className="text-primary-dark" />
-        <span className="font-extrabold tracking-tighter text-5xl md:text-7xl">
+        <span className="font-extrabold tracking-tighter text-5xl md:text-7xl marquee-text">
             POROBANGLA AI
         </span>
     </div>
@@ -66,6 +65,13 @@ const MarqueeItem = () => (
 
 const Footer: React.FC = () => {
   const navigate = useNavigate();
+
+  const productLinks = [
+    { name: 'Generator', href: '#/generate' },
+    { name: 'Mock Tests', href: '#/mock-test' },
+    { name: 'Showcase' },
+    { name: 'Pricing' }
+  ];
 
   return (
     <footer className="relative w-full bg-[#0A0A0A] pt-24 overflow-hidden border-t border-secondary/10 mt-32">
@@ -98,13 +104,13 @@ const Footer: React.FC = () => {
 
             {/* Columns */}
             <div className="col-span-1 md:col-span-2">
-                <FooterColumn title="Product" links={['Generator', 'Flashcards', 'Showcase', 'Pricing']} />
+                <FooterColumn title="Product" links={productLinks} />
             </div>
             <div className="col-span-1 md:col-span-2">
-                <FooterColumn title="Resources" links={['Documentation', 'API Reference', 'Community', 'Help']} />
+                <FooterColumn title="Resources" links={[{name: 'Documentation'}, {name: 'API Reference'}, {name: 'Community'}, {name: 'Help'}]} />
             </div>
             <div className="col-span-1 md:col-span-2">
-                 <FooterColumn title="Company" links={['About', 'Careers', 'Legal', 'Contact']} />
+                 <FooterColumn title="Company" links={[{name: 'About'}, {name: 'Careers'}, {name: 'Legal'}, {name: 'Contact'}]} />
             </div>
         </div>
 

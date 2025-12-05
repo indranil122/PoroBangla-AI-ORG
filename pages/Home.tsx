@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Zap, BookOpen, BrainCircuit, ArrowRight } from 'lucide-react';
+import { Sparkles, Zap, BookOpen, BrainCircuit, ArrowRight, FileQuestion } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 
@@ -66,14 +66,14 @@ const Home: React.FC = () => {
                 desc: "Generate comprehensive academic notes in seconds with our advanced AI engine." 
               },
               { 
+                icon: FileQuestion, 
+                title: "AI Mock Tests", 
+                desc: "Test your knowledge with dynamic, AI-generated quizzes on any topic you've studied."
+              },
+              { 
                 icon: BookOpen, 
                 title: "Academic Structure", 
                 desc: "Perfectly formatted with LaTeX math, clean tables, and hierarchical organization." 
-              },
-              { 
-                icon: BrainCircuit, 
-                title: "Adaptive Depth", 
-                desc: "From elementary school to PhD level research, PoroBangla adapts to your needs." 
               }
             ].map((feature, idx) => (
               <motion.div

@@ -99,10 +99,10 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Links (Center) */}
           <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-             {!isGenerator && (
+             {!isGenerator && !location.pathname.startsWith('/mock-test') && !location.pathname.startsWith('/test-') && (
                <>
                  <button 
-                   onClick={() => navigate('/flashcards')}
+                   onClick={() => navigate('/mock-test')}
                    className={`
                      px-4 py-1.5 text-sm font-medium transition-all duration-300 rounded-full
                      ${isScrolled 
@@ -111,7 +111,7 @@ const Navbar: React.FC = () => {
                      }
                    `}
                  >
-                   Flashcards
+                   Mock Tests
                  </button>
                  {['Features', 'Pricing'].map((item) => (
                     <button 
@@ -143,7 +143,7 @@ const Navbar: React.FC = () => {
 
              {/* Dynamic CTA */}
              <AnimatePresence mode="wait">
-               {!isGenerator ? (
+               {location.pathname === '/' ? (
                  <motion.button
                    key="launch"
                    initial={{ opacity: 0, scale: 0.9 }}
@@ -194,8 +194,8 @@ const Navbar: React.FC = () => {
              className="fixed top-24 left-4 right-4 z-40 bg-[#0F0F0F]/95 backdrop-blur-xl border border-secondary/20 rounded-2xl overflow-hidden shadow-2xl md:hidden"
           >
              <div className="p-6 flex flex-col gap-4">
-               <button onClick={() => { navigate('/flashcards'); setIsMobileMenuOpen(false); }} className="text-left text-secondary py-3 border-b border-white/5 flex items-center justify-between group">
-                  Flashcards
+               <button onClick={() => { navigate('/mock-test'); setIsMobileMenuOpen(false); }} className="text-left text-secondary py-3 border-b border-white/5 flex items-center justify-between group">
+                  Mock Tests
                   <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
                </button>
                {['Features', 'Pricing', 'Resources'].map((item) => (
