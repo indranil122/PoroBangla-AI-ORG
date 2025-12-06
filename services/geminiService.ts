@@ -1,12 +1,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { NoteRequest, GeneratedNote, MockTest, Question } from "../types";
 
-// FIX: Simplified AI initialization to adhere to API key guidelines.
-// The API key must be obtained exclusively from `process.env.API_KEY`.
+// FIX: Updated AI initialization to match your Vercel/Vite environment variable.
 const getAI = () => {
-  const apiKey = process.env.API_KEY;
+  // We check process.env first (Standard Node/Vercel Server)
+  // We fallback to import.meta.env (Vite Client side) just in case
+  const apiKey = process.env.VITE_GEMINI_API_KEY || 
+                 (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : undefined);
+
   if (!apiKey) {
-    const errorMsg = "Configuration Error: API_KEY environment variable is not set.";
+    const errorMsg = "Configuration Error: VITE_GEMINI_API_KEY environment variable is not set.";
     console.error(errorMsg);
     throw new Error(errorMsg);
   }
@@ -112,7 +115,6 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
 export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
   const modelId = 'gemini-2.5-flash';
   
-  // FIX: Simplified AI initialization. The `getAI` function already handles errors.
   const ai = getAI();
   
   const prompt = `You are an expert teacher and note-maker. The user has provided the following inputs:
