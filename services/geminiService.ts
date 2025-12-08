@@ -1,15 +1,22 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { NoteRequest, GeneratedNote, MockTest, Question } from "../types";
 
-// FIX: Updated AI initialization to match your Vercel/Vite environment variable.
+// HELPER: Cleans AI output to ensure JSON.parse doesn't fail
+// (AI often wraps JSON in ```json ... ``` blocks)
+const cleanJson = (text: string): string => {
+  if (!text) return "[]";
+  // Remove markdown code blocks if present
+  let clean = text.replace(/```json/g, "").replace(/```/g, "");
+  return clean.trim();
+};
+
+// FIX: Robust API Key Initialization
 const getAI = () => {
-  // We check process.env first (Standard Node/Vercel Server)
-  // We fallback to import.meta.env (Vite Client side) just in case
-  const apiKey = process.env.VITE_GEMINI_API_KEY || 
-                 (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : undefined);
+  // Check VITE_GEMINI_API_KEY first (Vercel/Vite), then fallback to standard API_KEY
+  const apiKey = process.env.VITE_GEMINI_API_KEY || process.env.API_KEY;
 
   if (!apiKey) {
-    const errorMsg = "Configuration Error: VITE_GEMINI_API_KEY environment variable is not set.";
+    const errorMsg = "Configuration Error: API Key is missing. Checked: VITE_GEMINI_API_KEY and API_KEY.";
     console.error(errorMsg);
     throw new Error(errorMsg);
   }
@@ -96,7 +103,9 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
     });
 
     const text = response.text || "[]";
-    const questions = JSON.parse(text);
+    
+    // FIX: Use cleanJson() here to prevent crashes
+    const questions = JSON.parse(cleanJson(text));
 
     // Validate the structure
     if (!Array.isArray(questions) || questions.some(q => q.options.length !== 4)) {
