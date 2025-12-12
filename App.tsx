@@ -5,9 +5,11 @@ import AnimatedBackground from './components/AnimatedBackground';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Generator from './pages/Generator';
-import MockTestGenerator from './pages/MockTestGenerator';
+import Workspace from './pages/Workspace';
 import TestSession from './pages/TestSession';
 import TestResult from './pages/TestResult';
+import FlashcardGenerator from './pages/FlashcardGenerator';
+import StudySession from './pages/StudySession';
 import ScrollEffectWrapper from './components/ScrollEffectWrapper';
 
 const pageVariants = {
@@ -50,9 +52,12 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageWrapper page={<Home />} />} />
         <Route path="/generate" element={<PageWrapper page={<Generator />} />} />
-        <Route path="/mock-test" element={<PageWrapper page={<MockTestGenerator />} />} />
+        <Route path="/workspace" element={<PageWrapper page={<Workspace />} />} />
+        {/* Standalone sessions launched from workspace */}
         <Route path="/test-session" element={<TestSession />} />
         <Route path="/test-result" element={<TestResult />} />
+        <Route path="/generate-flashcards" element={<PageWrapper page={<FlashcardGenerator />} />} />
+        <Route path="/study/:id" element={<StudySession />} />
       </Routes>
     </AnimatePresence>
   );

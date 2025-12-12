@@ -163,15 +163,6 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
                         <blockquote className="border-l-4 border-primary pl-6 italic text-secondary-dark my-8 py-2 bg-primary/5 rounded-r-lg print:bg-transparent print:border-l-2 print:border-black print:text-black print:pl-4 print:my-4 print:italic" {...props} />
                     ),
                     p: ({node, ...props}) => <p className="mb-6 text-secondary leading-8 print:mb-3 print:text-black print:leading-normal" {...props} />,
-                    table: ({node, ...props}) => (
-                        <div className="overflow-x-auto my-8 rounded-lg border border-secondary/20 shadow-sm print:shadow-none print:border print:border-black print:my-4 print:rounded-none">
-                            <table className="w-full table-fixed min-w-full divide-y divide-secondary/20 bg-transparent print:divide-black" {...props} />
-                        </div>
-                    ),
-                    thead: ({node, ...props}) => <thead className="bg-white/5 print:bg-gray-100 print:border-b print:border-black" {...props} />,
-                    th: ({node, ...props}) => <th className="px-6 py-4 text-left text-xs font-bold text-secondary-dark uppercase tracking-wider border-b border-secondary/20 print:text-black print:px-3 print:py-2 print:border-black" {...props} />,
-                    td: ({node, ...props}) => <td className="px-6 py-4 text-sm text-secondary leading-relaxed border-t border-secondary/10 align-top break-words print:text-black print:px-3 print:py-2 print:border-t print:border-gray-300" {...props} />,
-                    tr: ({node, ...props}) => <tr className="hover:bg-white/5 transition-colors print:hover:bg-transparent" {...props} />,
                     img: ({node, ...props}) => (
                       <div className="my-8 flex flex-col items-center break-inside-avoid print:my-4">
                         <div className="relative group overflow-hidden rounded-xl border border-secondary/20 shadow-lg print:shadow-none print:border print:border-black print:rounded-none">

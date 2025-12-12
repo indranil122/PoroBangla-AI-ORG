@@ -1,14 +1,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { NoteRequest, GeneratedNote, MockTest, Question } from "../types";
+import { NoteRequest, GeneratedNote, MockTest, Question, GeneratedFlashcard } from "../types";
 
 // FIX: Updated AI initialization to find your Vercel/Vite key
 const getAI = () => {
   // 1. Check process.env.VITE_GEMINI_API_KEY (Server-side Vercel)
   // 2. Check process.env.API_KEY (Backup standard)
   // 3. Check import.meta.env.VITE_GEMINI_API_KEY (Client-side Vite fallback)
+  // Fix: Cast import.meta to any to avoid TypeScript errors if types aren't configured
   const apiKey = process.env.VITE_GEMINI_API_KEY || 
                  process.env.API_KEY || 
-                 (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : undefined);
+                 ((import.meta as any).env ? (import.meta as any).env.VITE_GEMINI_API_KEY : undefined);
 
   if (!apiKey) {
     const errorMsg = "Configuration Error: VITE_GEMINI_API_KEY is not set.";
@@ -19,47 +20,35 @@ const getAI = () => {
 };
 
 /**
- * Generates a diagram/image using the nano banana model.
- */
-async function generateDiagram(prompt: string): Promise<string | null> {
-  try {
-    const ai = getAI();
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: {
-        parts: [{ text: prompt }]
-      },
-      config: {
-        imageConfig: {
-          aspectRatio: "16:9", 
-        }
-      }
-    });
-
-    for (const candidate of response.candidates || []) {
-      for (const part of candidate.content?.parts || []) {
-        if (part.inlineData && part.inlineData.data) {
-          return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-        }
-      }
-    }
-    return null;
-  } catch (error) {
-    console.warn("Diagram generation skipped:", error);
-    return null; 
-  }
-}
-
-/**
  * Generates a Mock Test with multiple-choice questions.
  */
 export const generateMockTest = async (topic: string, level: string, numQuestions: number): Promise<Question[]> => {
-  const modelId = 'gemini-2.5-flash';
+  // Using gemini-3-pro-preview for high logic tasks like exam creation
+  const modelId = 'gemini-3-pro-preview';
   const ai = getAI();
 
+  // Enhanced prompt for "Best in Class" generation
   const prompt = `
-    Create a mock test with ${numQuestions} multiple-choice questions on the topic "${topic}" for a student at the "${level}" level.
-    For each question, provide 4 options, a correct answer index (0-3), and a brief explanation for the correct answer.
+    Act as a world-class academic examiner and subject matter expert. 
+    Design a high-quality, rigorous mock test on the topic "${topic}" specifically tailored for a "${level}" level student.
+    
+    Generate exactly ${numQuestions} multiple-choice questions.
+
+    CRITICAL QUALITY GUIDELINES:
+    1. **Cognitive Depth & Variety**: 
+       - Move beyond simple definition recall. 
+       - Include questions that require **Analysis** (comparing concepts), **Application** (scenarios/problem solving), and **Critical Thinking** appropriate for the "${level}" level.
+    
+    2. **Distractor Engineering (Wrong Answers)**:
+       - The wrong options (distractors) MUST be plausible and realistic to test deep understanding. 
+       - Avoid obviously incorrect, silly, or "filler" answers.
+       - Distractors should target common misconceptions or near-miss logic relevant to the subject.
+    
+    3. **Educational Value**: 
+       - The explanation provided for the correct answer should be clear, concise, and educational.
+       - Where applicable, explain *why* the distractor is wrong to reinforce learning.
+
+    4. **Format**: Return ONLY valid JSON matching the specified schema.
   `;
 
   try {
@@ -68,6 +57,7 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
       contents: prompt,
       config: {
         responseMimeType: "application/json",
+        maxOutputTokens: 8192,
         responseSchema: {
           type: Type.ARRAY,
           items: {
@@ -75,12 +65,12 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
             properties: {
               question: {
                 type: Type.STRING,
-                description: "The question text."
+                description: "The question text. Ensure it is clear, unambiguous, and academically rigorous."
               },
               options: {
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
-                description: "An array of 4 possible answers."
+                description: "An array of exactly 4 options. One correct answer and three highly plausible distractors."
               },
               correctAnswerIndex: {
                 type: Type.INTEGER,
@@ -88,7 +78,7 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
               },
               explanation: {
                 type: Type.STRING,
-                description: "A brief explanation of why the correct answer is right."
+                description: "A helpful, educational explanation of why the correct answer is right and/or why others are wrong."
               }
             },
             required: ["question", "options", "correctAnswerIndex", "explanation"],
@@ -116,64 +106,48 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
   }
 };
 
-
 export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
-  const modelId = 'gemini-2.5-flash';
+  // Use gemini-3-pro-preview for complex STEM topics to ensure depth and reduce cut-off risk.
+  const modelId = 'gemini-3-pro-preview';
   
   const ai = getAI();
   
-  const prompt = `You are an expert teacher and note-maker. The user has provided the following inputs:
+  const prompt = `You are a distinguished academic professor and expert textbook author. 
+The user requires a comprehensive, deep-dive set of notes on:
 – Topic: "${request.topic}"
-– Standard/Class/Level: "${request.grade}"
+– Level: "${request.grade}"
 – Language: "${request.language}"
 
-Target Audience Adaptation (CRITICAL):
-You MUST adapt the content depth, complexity, examples, and terminology specifically for the "${request.grade}" level.
+OBJECTIVE:
+Generate a detailed, chapter-level academic resource.
+Do not provide a mere summary. Provide extensive explanations, derivations, examples, and context.
+You have a large output limit—utilize it to cover the topic thoroughly.
 
-Generate comprehensive, high-quality academic notes.
-
----
-STRICT TABLE FORMATTING RULES (DO NOT IGNORE):
-Whenever you show comparisons, advantages vs disadvantages, features, etc., you must use valid Markdown table syntax.
-
-Always follow this pattern:
-| Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
-| Row 1 C1 | Row 1 C2 | Row 1 C3 |
-| Row 2 C1 | Row 2 C2 | Row 2 C3 |
-
-- Exactly one row per line.
-- Do not keep writing text after the last | of a row.
-- Do not merge multiple logical rows into one long line.
-- Never generate "fake tables" using spaces.
-- If a cell needs long content, use <br> to break lines inside the cell.
-- Do not add extra separator rows (| :--- |) more than once after the header.
----
-
-DIAGRAMS & VISUALS:
-If a visual diagram, chart, or scientific picture is REQUIRED to explain a concept (e.g. "Structure of an Atom", "Circuit Diagram", "Flowchart of Process"):
-1. You must create a REALISTIC PROMPT for an image generation model.
-2. Insert a placeholder tag in this EXACT format:
-   <<IMAGE_PROMPT: A detailed, educational diagram showing [description]>>
-3. Do not use this for simple decorative images. Only for educational value.
-4. Limit to maximum 1-2 diagrams per note.
+CRITICAL INSTRUCTION FOR COMPLETENESS:
+Ensure the notes have a proper introduction, body, and conclusion. 
+Do not stop abruptly. If the topic is vast, prioritize the most critical core concepts and ensure the final section wraps up logically.
 
 ---
+FORMATTING INSTRUCTIONS:
+- **Do NOT use Markdown tables** (e.g., | Col | Col |). They do not render correctly in this environment.
+- Instead, present comparisons or structured data using **Bulleted Lists** or **Definition Lists**.
+  Example:
+  **Comparison: A vs B**
+  *   **Feature 1**: A has X, whereas B has Y.
+  *   **Feature 2**: A is slow, B is fast.
 
-Structured Layout & Formatting (in Markdown):
-- Use hierarchical headings: #, ##, ###.
-- Provide a table of contents.
-- Use LaTeX for ALL mathematical/chemical formulas (Always use default dark color, never white).
-  - Inline: $ equation $
-  - Block: $$ equation $$
-- Use code blocks for all code examples.
-- Use callout boxes (Definition:, Important:).
+- Use # for Title, ## for Main Sections, ### for Subsections.
+- Use LaTeX for ALL math/science formulas:
+  - Inline: $ E = mc^2 $
+  - Block: $$ \nabla \cdot E = \frac{\rho}{\epsilon_0} $$
+- Use **bold** for key terms.
+- Use blockquotes (>) for definitions or key takeaways.
+- Do not use placeholders for images.
 
-Tone & Style:
-- Professional, Academic, Clear.
-- No "References" or "Sources" sections.
+TONE:
+- Authoritative, Educational, Clear, and Rigorous.
 
-BEGIN NOTES for (${request.topic}, ${request.grade}).`;
+BEGIN NOTES for (${request.topic}).`;
 
   try {
     // Generate Text Content
@@ -182,36 +156,14 @@ BEGIN NOTES for (${request.topic}, ${request.grade}).`;
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
+        maxOutputTokens: 8192, // Maximize token budget
       }
     });
 
-    let content = response.text;
+    const content = response.text;
 
     if (!content) {
         throw new Error("The AI returned an empty response. Please try a different topic.");
-    }
-
-    // Parse and Generate Images for <<IMAGE_PROMPT: ...>> tags
-    const imageTagRegex = /<<IMAGE_PROMPT:\s*(.*?)>>/g;
-    const matches = [...content.matchAll(imageTagRegex)];
-
-    if (matches.length > 0) {
-      const imageReplacements = await Promise.all(
-        matches.map(async (match) => {
-          const fullTag = match[0];
-          const imagePrompt = match[1];
-          const base64Image = await generateDiagram(imagePrompt);
-          return { fullTag, base64Image, prompt: imagePrompt };
-        })
-      );
-
-      for (const { fullTag, base64Image, prompt } of imageReplacements) {
-        if (base64Image) {
-          content = content.replace(fullTag, `\n\n![${prompt}](${base64Image})\n*Figure: ${prompt}*\n\n`);
-        } else {
-          content = content.replace(fullTag, '');
-        }
-      }
     }
 
     return { content };
@@ -219,5 +171,58 @@ BEGIN NOTES for (${request.topic}, ${request.grade}).`;
     console.error("Gemini API Error:", error);
     const errorMessage = error.message || error.toString();
     throw new Error(`AI Service Error: ${errorMessage}`);
+  }
+};
+
+export const generateFlashcards = async (topic: string, context: string): Promise<GeneratedFlashcard[]> => {
+  const modelId = 'gemini-2.5-flash';
+  const ai = getAI();
+
+  const prompt = `
+    Create a set of 10-15 high-quality flashcards for the topic "${topic}".
+    ${context ? `Use the following context as a primary source:\n${context}\n` : ''}
+
+    Return a JSON array of objects. Each object must have:
+    - front: The question or concept (concise).
+    - back: The answer or definition (clear and accurate).
+    - cardType: One of "Basic", "Concept", "Fact".
+    - tags: An array of 1-3 short keyword tags related to the card.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: modelId,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        maxOutputTokens: 8192,
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              front: { type: Type.STRING },
+              back: { type: Type.STRING },
+              cardType: { type: Type.STRING },
+              tags: { type: Type.ARRAY, items: { type: Type.STRING } }
+            },
+            required: ["front", "back", "cardType", "tags"]
+          }
+        }
+      }
+    });
+
+    const text = response.text || "[]";
+    const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    const cards = JSON.parse(cleanText);
+
+    if (!Array.isArray(cards)) {
+        throw new Error("Invalid response format from AI");
+    }
+
+    return cards;
+  } catch (error) {
+    console.error("Flashcard Generation Error:", error);
+    throw new Error("Failed to generate flashcards.");
   }
 };

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ArrowRight, Zap } from 'lucide-react';
+import { Menu, X, ArrowRight, Zap, Layout } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const isGenerator = location.pathname === '/generate';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -99,34 +98,20 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Links (Center) */}
           <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-             {!isGenerator && !location.pathname.startsWith('/mock-test') && !location.pathname.startsWith('/test-') && (
+             {!location.pathname.startsWith('/test-') && !location.pathname.startsWith('/study') && location.pathname !== '/workspace' && (
                <>
                  <button 
-                   onClick={() => navigate('/mock-test')}
+                   onClick={() => navigate('/workspace')}
                    className={`
-                     px-4 py-1.5 text-sm font-medium transition-all duration-300 rounded-full
+                     px-5 py-2 text-sm font-medium transition-all duration-300 rounded-full flex items-center gap-2
                      ${isScrolled 
                        ? 'text-secondary-dark hover:text-white hover:bg-white/5' 
                        : 'text-secondary hover:text-white'
                      }
                    `}
                  >
-                   Mock Tests
+                   <Layout size={14} /> Workspace
                  </button>
-                 {['Features', 'Pricing'].map((item) => (
-                    <button 
-                      key={item}
-                      className={`
-                        px-4 py-1.5 text-sm font-medium transition-all duration-300 rounded-full
-                        ${isScrolled 
-                          ? 'text-secondary-dark hover:text-white hover:bg-white/5' 
-                          : 'text-secondary hover:text-white'
-                        }
-                      `}
-                    >
-                      {item}
-                    </button>
-                 ))}
                </>
              )}
           </div>
@@ -151,7 +136,7 @@ const Navbar: React.FC = () => {
                    exit={{ opacity: 0, scale: 0.9 }}
                    whileHover={{ scale: 1.05 }}
                    whileTap={{ scale: 0.95 }}
-                   onClick={() => navigate('/generate')}
+                   onClick={() => navigate('/workspace')}
                    className={`
                       hidden md:flex items-center gap-2 font-semibold transition-all duration-500
                       ${isScrolled 
@@ -194,19 +179,13 @@ const Navbar: React.FC = () => {
              className="fixed top-24 left-4 right-4 z-40 bg-[#0F0F0F]/95 backdrop-blur-xl border border-secondary/20 rounded-2xl overflow-hidden shadow-2xl md:hidden"
           >
              <div className="p-6 flex flex-col gap-4">
-               <button onClick={() => { navigate('/mock-test'); setIsMobileMenuOpen(false); }} className="text-left text-secondary py-3 border-b border-white/5 flex items-center justify-between group">
-                  Mock Tests
+               <button onClick={() => { navigate('/workspace'); setIsMobileMenuOpen(false); }} className="text-left text-secondary py-3 border-b border-white/5 flex items-center justify-between group">
+                  Workspace
                   <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
                </button>
-               {['Features', 'Pricing', 'Resources'].map((item) => (
-                 <button key={item} className="text-left text-secondary py-3 border-b border-white/5 last:border-0 hover:text-white flex items-center justify-between group">
-                   {item}
-                   <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
-                 </button>
-               ))}
                <button 
                  onClick={() => {
-                    navigate('/generate');
+                    navigate('/workspace');
                     setIsMobileMenuOpen(false);
                  }}
                  className="mt-2 w-full py-4 bg-gradient-to-r from-[#D8A441] to-[#F3C567] text-black font-bold rounded-xl flex items-center justify-center gap-2"

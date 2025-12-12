@@ -1,4 +1,4 @@
-import { Deck, Flashcard } from "../types";
+import { Deck, Flashcard, GeneratedFlashcard } from "../types";
 
 const STORAGE_KEY = 'porobangla_flashcard_decks';
 
@@ -67,11 +67,13 @@ export const deleteDeck = (deckId: string): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(decks));
 };
 
-export const createDeckFromAI = (topic: string, cardsData: { front: string; back: string }[]): Deck => {
+export const createDeckFromAI = (topic: string, cardsData: GeneratedFlashcard[]): Deck => {
   const newCards: Flashcard[] = cardsData.map(c => ({
     id: crypto.randomUUID(),
     front: c.front,
     back: c.back,
+    cardType: c.cardType,
+    tags: c.tags,
     interval: 0,
     repetition: 0,
     easeFactor: 2.5,

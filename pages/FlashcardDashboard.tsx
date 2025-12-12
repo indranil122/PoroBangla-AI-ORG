@@ -59,7 +59,7 @@ const FlashcardDashboard: React.FC = () => {
           </p>
         </div>
         <button 
-          onClick={() => navigate('/generate')}
+          onClick={() => navigate('/generate-flashcards')}
           className="mt-6 md:mt-0 px-8 py-4 bg-[#F3C567] hover:bg-[#D8A441] text-black font-bold rounded-full transition-all flex items-center gap-2 shadow-[0_0_30px_-5px_rgba(243,197,103,0.4)] group"
         >
           <Plus size={20} /> New Deck <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -78,7 +78,7 @@ const FlashcardDashboard: React.FC = () => {
             Generate your first intelligent flashcard deck from your notes to start learning efficiently.
           </p>
           <button 
-             onClick={() => navigate('/generate')}
+             onClick={() => navigate('/generate-flashcards')}
              className="px-8 py-3 bg-white/10 hover:bg-white text-white hover:text-black font-bold rounded-full transition-all"
           >
             Create First Deck

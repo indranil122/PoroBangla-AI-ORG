@@ -19,30 +19,6 @@ export interface Feature {
   icon: any; // Lucide icon type
 }
 
-// FIX: Added missing type definitions for Flashcard and Deck.
-// --- FLASHCARD SYSTEM TYPES ---
-
-export interface Flashcard {
-  id: string;
-  front: string;
-  back: string;
-  interval: number;
-  repetition: number;
-  easeFactor: number;
-  nextReviewDate: number;
-  status: 'new' | 'learning' | 'review';
-}
-
-export interface Deck {
-  id: string;
-  title: string;
-  cards: Flashcard[];
-  createdAt: number;
-  lastStudied: number;
-  topic: string;
-}
-
-
 // --- MOCK TEST SYSTEM TYPES ---
 
 export interface Question {
@@ -63,4 +39,31 @@ export interface TestResult {
   userAnswers: (number | null)[];
   score: number;
   total: number;
+}
+
+// --- FLASHCARD SYSTEM TYPES ---
+
+export interface GeneratedFlashcard {
+  front: string;
+  back: string;
+  cardType: string;
+  tags: string[];
+}
+
+export interface Flashcard extends GeneratedFlashcard {
+  id: string;
+  interval: number;
+  repetition: number;
+  easeFactor: number;
+  nextReviewDate: number;
+  status: 'new' | 'learning' | 'review';
+}
+
+export interface Deck {
+  id: string;
+  title: string;
+  cards: Flashcard[];
+  createdAt: number;
+  lastStudied: number;
+  topic: string;
 }
