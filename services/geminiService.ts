@@ -1,18 +1,25 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { NoteRequest, GeneratedNote, MockTest, Question, GeneratedFlashcard } from "../types";
 
-// FIX: Updated AI initialization to find your Vercel/Vite key
+// HELPER: Cleans AI output to ensure JSON.parse doesn't fail
+const cleanJson = (text: string): string => {
+  if (!text) return "{}";
+  // Remove markdown code blocks if present
+  let clean = text.replace(/```json/g, "").replace(/```/g, "");
+  return clean.trim();
+};
+
+// FIX: Robust API Key Initialization for Vercel/Vite
 const getAI = () => {
-  // 1. Check process.env.VITE_GEMINI_API_KEY (Server-side Vercel)
+  // 1. Check process.env.VITE_GEMINI_API_KEY (Server-side Vercel/Node)
   // 2. Check process.env.API_KEY (Backup standard)
   // 3. Check import.meta.env.VITE_GEMINI_API_KEY (Client-side Vite fallback)
-  // Fix: Cast import.meta to any to avoid TypeScript errors if types aren't configured
   const apiKey = process.env.VITE_GEMINI_API_KEY || 
                  process.env.API_KEY || 
-                 ((import.meta as any).env ? (import.meta as any).env.VITE_GEMINI_API_KEY : undefined);
+                 (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : undefined);
 
   if (!apiKey) {
-    const errorMsg = "Configuration Error: VITE_GEMINI_API_KEY is not set.";
+    const errorMsg = "Configuration Error: API Key is missing. Please check VITE_GEMINI_API_KEY in your environment variables.";
     console.error(errorMsg);
     throw new Error(errorMsg);
   }
@@ -23,8 +30,8 @@ const getAI = () => {
  * Generates a Mock Test with multiple-choice questions.
  */
 export const generateMockTest = async (topic: string, level: string, numQuestions: number): Promise<Question[]> => {
-  // Using gemini-3-pro-preview for high logic tasks like exam creation
-  const modelId = 'gemini-3-pro-preview';
+  // Using gemini-2.5-flash for speed and efficiency
+  const modelId = 'gemini-2.5-flash';
   const ai = getAI();
 
   // Enhanced prompt for "Best in Class" generation
@@ -58,26 +65,27 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
       config: {
         responseMimeType: "application/json",
         maxOutputTokens: 8192,
+        // FIX: Use string literals for schema types
         responseSchema: {
-          type: Type.ARRAY,
+          type: 'ARRAY',
           items: {
-            type: Type.OBJECT,
+            type: 'OBJECT',
             properties: {
               question: {
-                type: Type.STRING,
+                type: 'STRING',
                 description: "The question text. Ensure it is clear, unambiguous, and academically rigorous."
               },
               options: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
+                type: 'ARRAY',
+                items: { type: 'STRING' },
                 description: "An array of exactly 4 options. One correct answer and three highly plausible distractors."
               },
               correctAnswerIndex: {
-                type: Type.INTEGER,
+                type: 'INTEGER',
                 description: "The 0-based index of the correct answer in the options array."
               },
               explanation: {
-                type: Type.STRING,
+                type: 'STRING',
                 description: "A helpful, educational explanation of why the correct answer is right and/or why others are wrong."
               }
             },
@@ -90,8 +98,7 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
     const text = response.text || "[]";
     
     // Quick cleanup just in case AI wraps response in markdown
-    const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    const questions = JSON.parse(cleanText);
+    const questions = JSON.parse(cleanJson(text));
 
     // Validate the structure
     if (!Array.isArray(questions) || questions.some(q => q.options.length !== 4)) {
@@ -107,8 +114,8 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
 };
 
 export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
-  // Use gemini-3-pro-preview for complex STEM topics to ensure depth and reduce cut-off risk.
-  const modelId = 'gemini-3-pro-preview';
+  // Use gemini-2.5-flash for complex STEM topics to ensure depth and reduce cut-off risk.
+  const modelId = 'gemini-2.5-flash';
   
   const ai = getAI();
   
@@ -123,9 +130,6 @@ Generate a detailed, chapter-level academic resource.
 Do not provide a mere summary. Provide extensive explanations, derivations, examples, and context.
 You have a large output limit—utilize it to cover the topic thoroughly.
 
-SEARCH INTEGRATION:
-Use the available Google Search tool to gather up-to-date information, verify facts, and find real-world examples. Ensure the notes are grounded in accurate data.
-
 CRITICAL INSTRUCTION FOR COMPLETENESS:
 Ensure the notes have a proper introduction, body, and conclusion. 
 Do not stop abruptly. If the topic is vast, prioritize the most critical core concepts and ensure the final section wraps up logically.
@@ -136,8 +140,8 @@ FORMATTING INSTRUCTIONS:
 - Instead, present comparisons or structured data using **Bulleted Lists** or **Definition Lists**.
   Example:
   **Comparison: A vs B**
-  *   **Feature 1**: A has X, whereas B has Y.
-  *   **Feature 2**: A is slow, B is fast.
+  * **Feature 1**: A has X, whereas B has Y.
+  * **Feature 2**: A is slow, B is fast.
 
 - Use # for Title, ## for Main Sections, ### for Subsections.
 - Use LaTeX for ALL math/science formulas:
@@ -158,7 +162,7 @@ BEGIN NOTES for (${request.topic}).`;
       model: modelId,
       contents: prompt,
       config: {
-        tools: [{ googleSearch: {} }],
+        // Removed googleSearch tool to prevent errors if not enabled on API key
         maxOutputTokens: 8192, // Maximize token budget
       }
     });
@@ -213,15 +217,16 @@ export const generateFlashcards = async (topic: string, context: string): Promis
       config: {
         responseMimeType: "application/json",
         maxOutputTokens: 8192,
+        // FIX: Use string literals for schema types
         responseSchema: {
-          type: Type.ARRAY,
+          type: 'ARRAY',
           items: {
-            type: Type.OBJECT,
+            type: 'OBJECT',
             properties: {
-              front: { type: Type.STRING },
-              back: { type: Type.STRING },
-              cardType: { type: Type.STRING },
-              tags: { type: Type.ARRAY, items: { type: Type.STRING } }
+              front: { type: 'STRING' },
+              back: { type: 'STRING' },
+              cardType: { type: 'STRING' },
+              tags: { type: 'ARRAY', items: { type: 'STRING' } }
             },
             required: ["front", "back", "cardType", "tags"]
           }
@@ -230,8 +235,7 @@ export const generateFlashcards = async (topic: string, context: string): Promis
     });
 
     const text = response.text || "[]";
-    const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    const cards = JSON.parse(cleanText);
+    const cards = JSON.parse(cleanJson(text));
 
     if (!Array.isArray(cards)) {
         throw new Error("Invalid response format from AI");
