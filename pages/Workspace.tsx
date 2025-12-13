@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -20,6 +20,7 @@ const Workspace: React.FC = () => {
     // --- NOTES STATE ---
     const [noteStep, setNoteStep] = useState<'input' | 'result'>('input');
     const [isNoteLoading, setIsNoteLoading] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState("Initializing...");
     const [isExporting, setIsExporting] = useState(false);
     const [noteError, setNoteError] = useState<string | null>(null);
     const [noteForm, setNoteForm] = useState<NoteRequest>({
@@ -28,6 +29,7 @@ const Workspace: React.FC = () => {
         language: NoteLanguage.English
     });
     const [generatedContent, setGeneratedContent] = useState<string>('');
+    const [generatedSources, setGeneratedSources] = useState<{ uri: string; title: string }[]>([]);
     const [showSettings, setShowSettings] = useState(false);
     const [printSettings, setPrintSettings] = useState<NotebookSettings>({
         fontSize: 'md',
@@ -43,6 +45,33 @@ const Workspace: React.FC = () => {
         numQuestions: 10
     });
 
+    // --- LOADING MESSAGE EFFECT ---
+    useEffect(() => {
+        if (!isNoteLoading) return;
+        
+        const topic = noteForm.topic.trim() || "Subject";
+        const messages = [
+            `Studying "${topic}"...`,
+            "Connecting to knowledge base...",
+            "Consulting academic sources...",
+            "Extracting core principles...",
+            "Structuring chapter layout...",
+            "Synthesizing explanations...",
+            "Formatting equations and lists...",
+            "Polishing final document..."
+        ];
+        
+        let i = 0;
+        setLoadingStatus(messages[0]);
+        
+        const interval = setInterval(() => {
+            i = (i + 1) % messages.length;
+            setLoadingStatus(messages[i]);
+        }, 2500); // Change message every 2.5 seconds
+        
+        return () => clearInterval(interval);
+    }, [isNoteLoading, noteForm.topic]);
+
     // --- NOTES HANDLERS ---
     const handleGenerateNote = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,6 +83,7 @@ const Workspace: React.FC = () => {
         try {
             const result = await generateNotes(noteForm);
             setGeneratedContent(result.content);
+            setGeneratedSources(result.sources || []);
             setNoteStep('result');
         } catch (err: any) {
             setNoteError(err.message || "An unexpected error occurred.");
@@ -95,6 +125,56 @@ const Workspace: React.FC = () => {
         } finally {
             setIsExporting(false);
         }
+    };
+
+    const handleExportDoc = () => {
+        const element = document.getElementById('printable-notebook');
+        if (!element) return;
+        
+        // Clone to manipulate
+        const clone = element.cloneNode(true) as HTMLElement;
+        
+        // Remove UI elements that shouldn't be in the doc (buttons, etc)
+        const uiElements = clone.querySelectorAll('button, .print\\:hidden'); 
+        uiElements.forEach(el => el.remove());
+        
+        // Basic styling for the doc (Word/Google Docs compatible HTML)
+        const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${noteForm.topic}</title>
+        <style>
+          body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #000; background: #fff; max-width: 800px; margin: 0 auto; }
+          h1 { font-size: 24pt; color: #d8a441; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
+          h2 { font-size: 18pt; color: #333; margin-top: 25px; margin-bottom: 10px; }
+          h3 { font-size: 14pt; color: #d8a441; margin-top: 20px; margin-bottom: 10px; }
+          p { margin-bottom: 15px; text-align: justify; }
+          ul, ol { margin-bottom: 15px; padding-left: 25px; }
+          li { margin-bottom: 5px; }
+          code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: monospace; color: #d8a441; }
+          pre { background: #f4f4f4; padding: 15px; border-radius: 5px; white-space: pre-wrap; }
+          blockquote { border-left: 4px solid #d8a441; padding-left: 15px; font-style: italic; color: #555; background: #fafafa; padding: 10px; margin: 20px 0; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; text-align: left; }
+          td { padding: 10px; border: 1px solid #ddd; }
+          a { color: #d8a441; text-decoration: none; }
+        </style>
+        </head><body>`;
+        const postHtml = "</body></html>";
+        
+        const html = preHtml + clone.innerHTML + postHtml;
+    
+        const blob = new Blob(['\ufeff', html], {
+            type: 'application/msword'
+        });
+        
+        const url = URL.createObjectURL(blob);
+        
+        const downloadLink = document.createElement("a");
+        document.body.appendChild(downloadLink);
+        downloadLink.href = url;
+        downloadLink.download = `${noteForm.topic.replace(/[^a-z0-9]/gi, '_')}_PoroBangla.doc`;
+        downloadLink.click();
+        
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(url);
     };
 
     // --- MOCK TEST HANDLERS ---
@@ -284,9 +364,16 @@ const Workspace: React.FC = () => {
                                                     style={{ backgroundSize: '200% auto' }}
                                                 >
                                                     {isNoteLoading ? (
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-2 min-w-[150px] justify-center">
                                                             <Loader2 size={18} className="animate-spin text-black" />
-                                                            <span>Synthesizing...</span>
+                                                            <motion.span 
+                                                                key={loadingStatus}
+                                                                initial={{ opacity: 0, y: 5 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                className="truncate"
+                                                            >
+                                                                {loadingStatus}
+                                                            </motion.span>
                                                         </div>
                                                     ) : (
                                                         <>
@@ -408,6 +495,14 @@ const Workspace: React.FC = () => {
                                                     {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                                                     Export PDF
                                                 </button>
+
+                                                <button 
+                                                    onClick={handleExportDoc}
+                                                    className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white transition-all text-sm font-semibold flex items-center gap-2"
+                                                    title="Export to Google Docs / Word"
+                                                >
+                                                    <FileText size={16} /> Doc
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -417,6 +512,7 @@ const Workspace: React.FC = () => {
                                         language={noteForm.language} 
                                         title={noteForm.topic}
                                         settings={printSettings}
+                                        sources={generatedSources}
                                     />
                                 </motion.div>
                             )}

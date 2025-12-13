@@ -11,6 +11,7 @@ export interface NoteRequest {
 
 export interface GeneratedNote {
   content: string; // Markdown content
+  sources?: { uri: string; title: string }[];
 }
 
 export interface Feature {

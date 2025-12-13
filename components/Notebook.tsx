@@ -4,7 +4,7 @@ import { NoteLanguage } from '../types';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import { Check, ZoomIn, BookOpen, Save } from 'lucide-react';
+import { Check, ZoomIn, BookOpen, Save, ExternalLink } from 'lucide-react';
 
 export interface NotebookSettings {
   fontSize: 'sm' | 'md' | 'lg';
@@ -16,6 +16,7 @@ interface NotebookProps {
   language: NoteLanguage;
   title: string;
   settings?: NotebookSettings;
+  sources?: { uri: string; title: string }[];
 }
 
 const ListItem: React.FC<React.LiHTMLAttributes<HTMLLIElement> & { ordered?: boolean }> = ({ children, ordered, ...props }) => {
@@ -53,7 +54,7 @@ const ListItem: React.FC<React.LiHTMLAttributes<HTMLLIElement> & { ordered?: boo
   );
 };
 
-const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings = { fontSize: 'md', layout: 'standard' } }) => {
+const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings = { fontSize: 'md', layout: 'standard' }, sources }) => {
   const fontClass = language === NoteLanguage.Bengali ? 'font-bengali' : 'font-sans';
   const [isSaved, setIsSaved] = useState(false);
   
@@ -204,6 +205,29 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
             >
                 {content}
             </ReactMarkdown>
+            
+            {/* Sources & References Section */}
+            {sources && sources.length > 0 && (
+                <div className="mt-12 pt-8 border-t border-secondary/20 print:mt-6 print:pt-4 print:border-black break-inside-avoid">
+                    <h3 className="text-sm font-bold text-secondary-dark uppercase tracking-widest mb-4 print:text-black">Sources & References</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 print:grid-cols-2">
+                        {sources.map((source, idx) => (
+                            <a 
+                                key={idx} 
+                                href={source.uri} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 hover:border-primary/30 transition-all group print:bg-gray-100 print:border-gray-300 print:text-black no-underline"
+                            >
+                                <div className="p-1.5 rounded-md bg-black/20 text-secondary-dark group-hover:text-primary transition-colors print:bg-transparent print:text-black">
+                                    <ExternalLink size={14} />
+                                </div>
+                                <span className="text-sm text-secondary truncate group-hover:text-white transition-colors print:text-black">{source.title}</span>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
       </div>
     </motion.div>
