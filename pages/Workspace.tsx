@@ -521,7 +521,7 @@ const Workspace: React.FC = () => {
                                         settings={printSettings}
                                         sources={generatedSources}
                                     />
-                                </motion.div>
+                                </MotionDiv>
                             )}
                         </MotionDiv>
                     ) : (
