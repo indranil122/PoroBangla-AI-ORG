@@ -1,93 +1,141 @@
-import { GoogleGenAI } from "@google/genai";
-import { NoteRequest, GeneratedNote, MockTest, Question, GeneratedFlashcard, StudyGuideRequest, StudyGuideResponse } from "../types";
+import { GoogleGenAI, Type } from "@google/genai";
+import {
+  NoteRequest,
+  GeneratedNote,
+  Question,
+  GeneratedFlashcard,
+  StudyGuideRequest,
+  StudyGuideResponse
+} from "../types";
 
-// HELPER: Cleans AI output to ensure JSON.parse doesn't fail
-const cleanJson = (text: string): string => {
-  if (!text) return "{}";
-  // Remove markdown code blocks if present
-  let clean = text.replace(/```json/g, "").replace(/```/g, "");
-  return clean.trim();
-};
+/* ------------------------------------------------------------------ */
+/*  VITE-SAFE GEMINI CLIENT                                           */
+/* ------------------------------------------------------------------ */
 
-/**
- * Robust API Key Initialization
- * 1. Checks VITE_GEMINI_API_KEY (Vite standard for client-side)
- * 2. Checks process.env.API_KEY (Fallback for Node/Serverless contexts)
- */
-const getAI = () => {
-  const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || process.env.API_KEY;
+const getGeminiClient = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
   if (!apiKey) {
-    console.error("Configuration Error: API Key is missing. Ensure VITE_GEMINI_API_KEY is set in Vercel.");
-    throw new Error("AUTH_ERROR: API Key is missing.");
+    throw new Error(
+      "VITE_GEMINI_API_KEY is missing. Add it in Vercel Environment Variables."
+    );
   }
+
   return new GoogleGenAI({ apiKey });
 };
 
-export const generateMockTest = async (topic: string, level: string, numQuestions: number): Promise<Question[]> => {
-  const modelId = 'gemini-2.0-flash'; // Recommended stable model
-  const ai = getAI();
+/* ------------------------------------------------------------------ */
+/*  HELPER: CLEAN JSON OUTPUT                                          */
+/* ------------------------------------------------------------------ */
+
+const cleanJson = (text?: string): string => {
+  if (!text) return "[]";
+
+  let clean = text.replace(/```json|```/g, "").trim();
+
+  const start = clean.indexOf("[");
+  const end = clean.lastIndexOf("]");
+
+  if (start !== -1 && end !== -1) {
+    clean = clean.slice(start, end + 1);
+  }
+
+  return clean;
+};
+
+/* ------------------------------------------------------------------ */
+/*  MOCK TEST GENERATION                                               */
+/* ------------------------------------------------------------------ */
+
+export const generateMockTest = async (
+  topic: string,
+  level: string,
+  numQuestions: number
+): Promise<Question[]> => {
+  const ai = getGeminiClient();
 
   const prompt = `
-    Act as a world-class academic examiner. 
+    Act as a world-class academic examiner.
     Design a mock test on "${topic}" for a "${level}" level.
     Generate exactly ${numQuestions} multiple-choice questions.
-    Return valid JSON matching the schema.
+    Return the response as a valid JSON array of objects.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: modelId,
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        // Using string literals for schema types is safer for Vercel builds than the Type enum
         responseSchema: {
-          type: 'ARRAY',
+          type: Type.ARRAY,
           items: {
-            type: 'OBJECT',
+            type: Type.OBJECT,
             properties: {
-              question: { type: 'STRING' },
-              options: { type: 'ARRAY', items: { type: 'STRING' } },
-              correctAnswerIndex: { type: 'INTEGER' },
-              explanation: { type: 'STRING' }
+              question: { type: Type.STRING },
+              options: { type: Type.ARRAY, items: { type: Type.STRING } },
+              correctAnswerIndex: { type: Type.INTEGER },
+              explanation: { type: Type.STRING }
             },
-            required: ["question", "options", "correctAnswerIndex", "explanation"],
-          },
-        },
-      },
+            required: [
+              "question",
+              "options",
+              "correctAnswerIndex",
+              "explanation"
+            ]
+          }
+        }
+      }
     });
-    return JSON.parse(cleanJson(response.text || "[]"));
+
+    return JSON.parse(cleanJson(response.text));
   } catch (error) {
     console.error("Mock Test Generation Error:", error);
     throw new Error("Failed to generate mock test.");
   }
 };
 
-export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
-  const modelId = 'gemini-2.0-flash';
-  const ai = getAI();
-  const prompt = `You are a distinguished academic professor from PoroBangla AI. 
-  Generate comprehensive academic notes on "${request.topic}" for "${request.grade}" level in "${request.language}". 
-  Use LaTeX for all math ($E=mc^2$). Do not use tables. Use bullet points for comparisons.`;
+/* ------------------------------------------------------------------ */
+/*  NOTES GENERATION                                                   */
+/* ------------------------------------------------------------------ */
+
+export const generateNotes = async (
+  request: NoteRequest
+): Promise<GeneratedNote> => {
+  const ai = getGeminiClient();
+
+  const prompt = `
+    You are a distinguished academic professor from PoroBangla AI.
+    Generate comprehensive academic notes on "${request.topic}"
+    for "${request.grade}" level in "${request.language}".
+
+    Use:
+    - Clear headers (H1, H2, H3)
+    - Bullet points
+    - LaTeX for formulas
+  `;
 
   try {
     const response = await ai.models.generateContent({
-      model: modelId,
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
-        tools: [{ googleSearch: {} }],
+        tools: [{ googleSearch: {} }]
       }
     });
+
     const content = response.text || "";
     const groundingMetadata = response.candidates?.[0]?.groundingMetadata;
-    let sources: { uri: string; title: string }[] = [];
-    if (groundingMetadata?.groundingChunks) {
-      sources = groundingMetadata.groundingChunks
-        .map((chunk: any) => chunk.web)
-        .filter((web: any) => web && web.uri && web.title)
-        .map((web: any) => ({ uri: web.uri, title: web.title }));
-    }
+
+    const sources =
+      groundingMetadata?.groundingChunks
+        ?.map((chunk: any) => chunk.web)
+        ?.filter((web: any) => web?.uri && web?.title)
+        ?.map((web: any) => ({
+          uri: web.uri,
+          title: web.title
+        })) || [];
+
     return { content, sources };
   } catch (error) {
     console.error("Note Generation Error:", error);
@@ -95,59 +143,85 @@ export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote
   }
 };
 
-export const generateFlashcards = async (topic: string, context: string): Promise<GeneratedFlashcard[]> => {
-  const modelId = 'gemini-2.0-flash';
-  const ai = getAI();
-  const prompt = `Create 10-15 high-quality flashcards for "${topic}". ${context ? `Use context: ${context}` : ''}`;
+/* ------------------------------------------------------------------ */
+/*  FLASHCARD GENERATION                                               */
+/* ------------------------------------------------------------------ */
+
+export const generateFlashcards = async (
+  topic: string,
+  context: string
+): Promise<GeneratedFlashcard[]> => {
+  const ai = getGeminiClient();
+
+  const prompt = `
+    Create 10–15 high-quality academic flashcards for "${topic}".
+    ${context ? `Context: ${context}` : ""}
+    Return the response as a JSON array of objects.
+  `;
 
   try {
     const response = await ai.models.generateContent({
-      model: modelId,
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: 'ARRAY',
+          type: Type.ARRAY,
           items: {
-            type: 'OBJECT',
+            type: Type.OBJECT,
             properties: {
-              front: { type: 'STRING' },
-              back: { type: 'STRING' },
-              cardType: { type: 'STRING' },
-              tags: { type: 'ARRAY', items: { type: 'STRING' } }
+              front: { type: Type.STRING },
+              back: { type: Type.STRING },
+              cardType: { type: Type.STRING },
+              tags: { type: Type.ARRAY, items: { type: Type.STRING } }
             },
             required: ["front", "back", "cardType", "tags"]
           }
         }
       }
     });
-    return JSON.parse(cleanJson(response.text || "[]"));
+
+    return JSON.parse(cleanJson(response.text));
   } catch (error) {
-    console.error("Flashcard Error:", error);
+    console.error("Flashcard Generation Error:", error);
     throw new Error("Failed to generate flashcards.");
   }
 };
 
-export const generateStudyGuide = async (req: StudyGuideRequest): Promise<StudyGuideResponse> => {
-  const modelId = 'gemini-2.0-flash-thinking-preview'; 
-  const ai = getAI();
+/* ------------------------------------------------------------------ */
+/*  STUDY GUIDE GENERATION                                             */
+/* ------------------------------------------------------------------ */
+
+export const generateStudyGuide = async (
+  req: StudyGuideRequest
+): Promise<StudyGuideResponse> => {
+  const ai = getGeminiClient();
+
   const prompt = `
-    Act as a dedicated personal tutor from PoroBangla AI. Create a ${req.days}-day study guide for "${req.topic}".
-    Target Level: ${req.level}. Detail: ${req.details}.
-    Format with Day X headers and practice challenges.
+    Act as a dedicated personal tutor from PoroBangla AI.
+    Create a highly structured ${req.days}-day study guide for "${req.topic}".
+
+    Target Level: ${req.level}
+    User Goals/Context: ${req.details}
+
+    Format with Day X headers and daily practice challenges.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: modelId,
+      model: "gemini-3-pro-preview",
       contents: prompt,
+      config: {
+        thinkingConfig: { thinkingBudget: 4000 }
+      }
     });
+
     return {
       content: response.text || "",
-      summary: `A ${req.days}-day masterclass plan for ${req.topic}.`
+      summary: `A strategic ${req.days}-day learning path for ${req.topic}.`
     };
   } catch (error) {
-    console.error("Study Guide Error:", error);
+    console.error("Study Guide Generation Error:", error);
     throw new Error("Failed to generate study guide.");
   }
 };
