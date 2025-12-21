@@ -9,28 +9,29 @@ const cleanJson = (text: string): string => {
   return clean.trim();
 };
 
-// Robust API Key Initialization for Vercel/Vite
+/**
+ * Robust API Key Initialization
+ * 1. Checks VITE_GEMINI_API_KEY (Vite standard for client-side)
+ * 2. Checks process.env.API_KEY (Fallback for Node/Serverless contexts)
+ */
 const getAI = () => {
-  // Check process.env (Vercel/Node) OR import.meta.env (Vite/Client)
-  const apiKey = process.env.VITE_GEMINI_API_KEY || 
-                 process.env.API_KEY || 
-                 (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : undefined);
+  const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || process.env.API_KEY;
 
   if (!apiKey) {
-    console.error("Configuration Error: VITE_GEMINI_API_KEY is missing.");
-    throw new Error("AUTH_ERROR: API Key is missing. Please check your Vercel Environment Variables.");
+    console.error("Configuration Error: API Key is missing. Ensure VITE_GEMINI_API_KEY is set in Vercel.");
+    throw new Error("AUTH_ERROR: API Key is missing.");
   }
   return new GoogleGenAI({ apiKey });
 };
 
 export const generateMockTest = async (topic: string, level: string, numQuestions: number): Promise<Question[]> => {
-  const modelId = 'gemini-2.0-flash'; // Updated to stable flash model
+  const modelId = 'gemini-2.0-flash'; // Recommended stable model
   const ai = getAI();
 
   const prompt = `
     Act as a world-class academic examiner. 
     Design a mock test on "${topic}" for a "${level}" level.
-    Generate ${numQuestions} multiple-choice questions.
+    Generate exactly ${numQuestions} multiple-choice questions.
     Return valid JSON matching the schema.
   `;
 
@@ -40,7 +41,7 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        // FIX: Use String Literals instead of Type.OBJECT to avoid Vercel build errors
+        // Using string literals for schema types is safer for Vercel builds than the Type enum
         responseSchema: {
           type: 'ARRAY',
           items: {
@@ -66,9 +67,9 @@ export const generateMockTest = async (topic: string, level: string, numQuestion
 export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote> => {
   const modelId = 'gemini-2.0-flash';
   const ai = getAI();
-  const prompt = `You are an expert professor at PoroBangla AI. Generate comprehensive academic notes on "${request.topic}" for "${request.grade}" level in "${request.language}". 
-  Use LaTeX for all mathematical and scientific formulas (e.g., $E=mc^2$). 
-  Use Markdown headers. Do not use tables. Use bullet points for comparisons.`;
+  const prompt = `You are a distinguished academic professor from PoroBangla AI. 
+  Generate comprehensive academic notes on "${request.topic}" for "${request.grade}" level in "${request.language}". 
+  Use LaTeX for all math ($E=mc^2$). Do not use tables. Use bullet points for comparisons.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -97,7 +98,7 @@ export const generateNotes = async (request: NoteRequest): Promise<GeneratedNote
 export const generateFlashcards = async (topic: string, context: string): Promise<GeneratedFlashcard[]> => {
   const modelId = 'gemini-2.0-flash';
   const ai = getAI();
-  const prompt = `Create 10-15 high-quality educational flashcards for "${topic}". ${context ? `Context: ${context}` : ''}`;
+  const prompt = `Create 10-15 high-quality flashcards for "${topic}". ${context ? `Use context: ${context}` : ''}`;
 
   try {
     const response = await ai.models.generateContent({
@@ -128,22 +129,12 @@ export const generateFlashcards = async (topic: string, context: string): Promis
 };
 
 export const generateStudyGuide = async (req: StudyGuideRequest): Promise<StudyGuideResponse> => {
-  // Using a stable reasoning model ID
   const modelId = 'gemini-2.0-flash-thinking-preview'; 
   const ai = getAI();
   const prompt = `
-    Act as a dedicated personal tutor from PoroBangla AI. Create a high-intensity study guide for "${req.topic}" over ${req.days} days.
-    Target Level: ${req.level}. 
-    Additional context: ${req.details}.
-    
-    Structure the response as:
-    1. A short, encouraging introduction.
-    2. A Day-by-Day breakdown using "## Day X: [Title]" format.
-    3. Each day should include: Learning Goals, Key Concepts to Master, and a "Practice Challenge".
-    4. A final "Tips for Success" section.
-    
-    Tone: Encouraging, authoritative, and structured.
-    Formatting: Use beautiful Markdown. Use LaTeX for math. Use bolding for terms.
+    Act as a dedicated personal tutor from PoroBangla AI. Create a ${req.days}-day study guide for "${req.topic}".
+    Target Level: ${req.level}. Detail: ${req.details}.
+    Format with Day X headers and practice challenges.
   `;
 
   try {
