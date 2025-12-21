@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NoteLanguage } from '../types';
@@ -5,6 +6,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { Check, ZoomIn, BookOpen, Save, ExternalLink } from 'lucide-react';
+
+// FIX: Casting motion components to any to resolve "initial/animate/exit/transition does not exist on type" errors in this environment
+const MotionDiv = motion.div as any;
 
 export interface NotebookSettings {
   fontSize: 'sm' | 'md' | 'lg';
@@ -94,7 +98,7 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
   };
 
   return (
-    <motion.div 
+    <MotionDiv 
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -114,23 +118,23 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
         >
             <AnimatePresence mode="wait">
                 {isSaved ? (
-                    <motion.div
+                    <MotionDiv
                         key="saved"
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.5, opacity: 0 }}
                     >
                         <Check size={20} className="text-primary" />
-                    </motion.div>
+                    </MotionDiv>
                 ) : (
-                    <motion.div
+                    <MotionDiv
                         key="save"
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.5, opacity: 0 }}
                     >
                         <Save size={20} />
-                    </motion.div>
+                    </MotionDiv>
                 )}
             </AnimatePresence>
         </button>
@@ -230,7 +234,7 @@ const Notebook: React.FC<NotebookProps> = ({ content, language, title, settings 
             )}
         </div>
       </div>
-    </motion.div>
+    </MotionDiv>
   );
 };
 

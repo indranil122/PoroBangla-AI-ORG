@@ -1,6 +1,8 @@
+
 import React, { ReactNode } from 'react';
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence, Transition } from 'framer-motion';
+// FIX: Using * as Router to handle potential export issues in some environments
+import * as Router from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedBackground from './components/AnimatedBackground';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -8,14 +10,16 @@ import Generator from './pages/Generator';
 import Workspace from './pages/Workspace';
 import TestSession from './pages/TestSession';
 import TestResult from './pages/TestResult';
+import FlashcardDashboard from './pages/FlashcardDashboard';
 import FlashcardGenerator from './pages/FlashcardGenerator';
 import StudySession from './pages/StudySession';
-import ScrollEffectWrapper from './components/ScrollEffectWrapper';
+import StudyGuide from './pages/StudyGuide';
+import MockTestGenerator from './pages/MockTestGenerator';
 
 const pageVariants = {
   initial: {
     opacity: 0,
-    x: -50,
+    x: -20,
   },
   in: {
     opacity: 1,
@@ -23,18 +27,21 @@ const pageVariants = {
   },
   out: {
     opacity: 0,
-    x: 50,
+    x: 20,
   },
 };
 
-const pageTransition: Transition = {
+// FIX: Removing Transition type import to resolve name collision error and using any for transition objects
+const pageTransition: any = {
   type: 'tween',
   ease: 'anticipate',
-  duration: 0.5,
+  duration: 0.4,
 };
 
+const MotionDiv = motion.div as any;
+
 const PageWrapper = ({ page }: { page: ReactNode }) => (
-  <motion.div
+  <MotionDiv
     initial="initial"
     animate="in"
     exit="out"
@@ -42,23 +49,25 @@ const PageWrapper = ({ page }: { page: ReactNode }) => (
     transition={pageTransition}
   >
     {page}
-  </motion.div>
+  </MotionDiv>
 );
 
 const AnimatedRoutes = () => {
-  const location = useLocation();
+  const location = Router.useLocation();
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageWrapper page={<Home />} />} />
-        <Route path="/generate" element={<PageWrapper page={<Generator />} />} />
-        <Route path="/workspace" element={<PageWrapper page={<Workspace />} />} />
-        {/* Standalone sessions launched from workspace */}
-        <Route path="/test-session" element={<TestSession />} />
-        <Route path="/test-result" element={<TestResult />} />
-        <Route path="/generate-flashcards" element={<PageWrapper page={<FlashcardGenerator />} />} />
-        <Route path="/study/:id" element={<StudySession />} />
-      </Routes>
+      <Router.Routes location={location} key={location.pathname}>
+        <Router.Route path="/" element={<PageWrapper page={<Home />} />} />
+        <Router.Route path="/generate" element={<PageWrapper page={<Generator />} />} />
+        <Router.Route path="/workspace" element={<PageWrapper page={<Workspace />} />} />
+        <Router.Route path="/study-guide" element={<PageWrapper page={<StudyGuide />} />} />
+        <Router.Route path="/mock-test" element={<PageWrapper page={<MockTestGenerator />} />} />
+        <Router.Route path="/test-session" element={<TestSession />} />
+        <Router.Route path="/test-result" element={<TestResult />} />
+        <Router.Route path="/flashcards" element={<PageWrapper page={<FlashcardDashboard />} />} />
+        <Router.Route path="/generate-flashcards" element={<PageWrapper page={<FlashcardGenerator />} />} />
+        <Router.Route path="/study/:id" element={<StudySession />} />
+      </Router.Routes>
     </AnimatePresence>
   );
 };
@@ -67,12 +76,10 @@ const App: React.FC = () => {
   return (
     <div className="antialiased text-secondary selection:bg-primary/30 font-sans min-h-screen">
       <AnimatedBackground />
-      <HashRouter>
+      <Router.HashRouter>
         <Navbar />
-        <ScrollEffectWrapper>
-          <AnimatedRoutes />
-        </ScrollEffectWrapper>
-      </HashRouter>
+        <AnimatedRoutes />
+      </Router.HashRouter>
     </div>
   );
 };

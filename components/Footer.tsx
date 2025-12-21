@@ -1,7 +1,14 @@
+
 import React from 'react';
-import { motion, Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowUpRight, Github, Twitter, Linkedin, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+// FIX: Using * as Router to handle potential export issues in some environments
+import * as Router from 'react-router-dom';
+
+// FIX: Casting motion components and variants to any to bypass type errors
+const MotionLi = motion.li as any;
+const MotionDiv = motion.div as any;
+const MotionUl = motion.ul as any;
 
 const SocialIcon = ({ icon: Icon, href }: { icon: any, href: string }) => (
   <a 
@@ -14,21 +21,21 @@ const SocialIcon = ({ icon: Icon, href }: { icon: any, href: string }) => (
   </a>
 );
 
-const linkVariants: Variants = {
+const linkVariants: any = {
   hidden: { opacity: 0, x: -15 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } }
 };
 
 const FooterLink: React.FC<{ children: React.ReactNode, href?: string }> = ({ children, href = "#" }) => (
-  <motion.li variants={linkVariants}>
+  <MotionLi variants={linkVariants}>
     <a href={href} className="text-secondary-dark hover:text-primary transition-colors text-sm font-medium flex items-center gap-2 group">
       <span className="w-0 h-[1px] bg-primary transition-all duration-300 group-hover:w-4"></span>
       {children}
     </a>
-  </motion.li>
+  </MotionLi>
 );
 
-const columnVariants = {
+const columnVariants: any = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -42,7 +49,7 @@ const columnVariants = {
 const FooterColumn = ({ title, links }: { title: string, links: { name: string, href?: string }[] }) => (
   <div className="space-y-6">
     <h3 className="text-sm font-bold text-white uppercase tracking-widest opacity-80">{title}</h3>
-    <motion.ul 
+    <MotionUl 
       variants={columnVariants}
       initial="hidden"
       whileInView="visible"
@@ -50,7 +57,7 @@ const FooterColumn = ({ title, links }: { title: string, links: { name: string, 
       className="space-y-4"
     >
       {links.map(link => <FooterLink key={link.name} href={link.href}>{link.name}</FooterLink>)}
-    </motion.ul>
+    </MotionUl>
   </div>
 );
 
@@ -64,7 +71,7 @@ const MarqueeItem = () => (
 );
 
 const Footer: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = Router.useNavigate();
 
   const productLinks = [
     { name: 'Generator', href: '#/generate' },
@@ -118,7 +125,7 @@ const Footer: React.FC = () => {
       
       {/* INFINITE SCROLLING MARQUEE */}
       <div className="relative w-full py-10 border-y border-secondary/10 overflow-hidden group cursor-default">
-          <motion.div 
+          <MotionDiv 
             className="flex whitespace-nowrap"
             animate={{ x: '-100%' }}
             transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
@@ -135,7 +142,7 @@ const Footer: React.FC = () => {
                   <MarqueeItem />
                   <MarqueeItem />
               </div>
-          </motion.div>
+          </MotionDiv>
           <style>{`
               .marquee-text {
                   -webkit-text-stroke: 1px #D8A441;

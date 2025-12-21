@@ -1,12 +1,18 @@
+
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+// FIX: Using * as Router to handle potential export issues in some environments
+import * as Router from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X, Loader2, ArrowRight } from 'lucide-react';
 import { MockTest, TestResult } from '../types';
 
+// FIX: Casting motion components to any
+const MotionDiv = motion.div as any;
+const MotionButton = motion.button as any;
+
 const TestSession: React.FC = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
+    const navigate = Router.useNavigate();
+    const location = Router.useLocation();
     const [test, setTest] = useState<MockTest | null>(null);
     const [userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -72,7 +78,7 @@ const TestSession: React.FC = () => {
                 <div className="mb-8">
                     <p className="text-sm font-medium text-primary mb-2 text-center">{test.topic}</p>
                     <div className="w-full bg-[#141414] rounded-full h-2.5 border border-secondary/10">
-                        <motion.div
+                        <MotionDiv
                             className="bg-primary h-2 rounded-full"
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
@@ -84,7 +90,7 @@ const TestSession: React.FC = () => {
 
                 {/* Question */}
                 <AnimatePresence mode="wait">
-                    <motion.div
+                    <MotionDiv
                         key={currentQuestionIndex}
                         initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -112,7 +118,7 @@ const TestSession: React.FC = () => {
                                 }
 
                                 return (
-                                    <motion.button
+                                    <MotionButton
                                         key={index}
                                         onClick={() => handleAnswerSelect(index)}
                                         disabled={isAnswered}
@@ -121,13 +127,13 @@ const TestSession: React.FC = () => {
                                     >
                                         <span className="text-secondary font-medium">{option}</span>
                                         {isAnswered && (isCorrect ? <Check className="text-green-500" /> : isSelected ? <X className="text-red-500" /> : null)}
-                                    </motion.button>
+                                    </MotionButton>
                                 );
                             })}
                         </div>
                         
                         {isAnswered && (
-                            <motion.div 
+                            <MotionDiv 
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -141,9 +147,9 @@ const TestSession: React.FC = () => {
                                 >
                                     {currentQuestionIndex === test.questions.length - 1 ? 'Finish' : 'Next'} <ArrowRight size={18} />
                                 </button>
-                            </motion.div>
+                            </MotionDiv>
                         )}
-                    </motion.div>
+                    </MotionDiv>
                 </AnimatePresence>
             </div>
         </div>

@@ -1,13 +1,18 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+// FIX: Using * as Router to handle potential export issues in some environments
+import * as Router from 'react-router-dom';
 import { Layers, FileText, ArrowRight, Loader2, Save, Trash2, Plus, Sparkles, Tag, AlertCircle } from 'lucide-react';
 import { generateFlashcards } from '../services/geminiService';
 import { createDeckFromAI } from '../services/flashcardService';
 import { GeneratedFlashcard } from '../types';
 
+// FIX: Casting motion components to any
+const MotionDiv = motion.div as any;
+
 const FlashcardGenerator: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = Router.useNavigate();
   const [step, setStep] = useState<'input' | 'review'>('input');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +60,7 @@ const FlashcardGenerator: React.FC = () => {
         
         {/* INPUT MODE */}
         {step === 'input' && (
-          <motion.div
+          <MotionDiv
             key="input"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -126,12 +131,12 @@ const FlashcardGenerator: React.FC = () => {
                   </button>
                </form>
             </div>
-          </motion.div>
+          </MotionDiv>
         )}
 
         {/* REVIEW MODE */}
         {step === 'review' && (
-          <motion.div
+          <MotionDiv
             key="review"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -160,7 +165,7 @@ const FlashcardGenerator: React.FC = () => {
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {cards.map((card, idx) => (
-                    <motion.div 
+                    <MotionDiv 
                         key={idx}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -204,7 +209,7 @@ const FlashcardGenerator: React.FC = () => {
                                 />
                             </div>
                         </div>
-                    </motion.div>
+                    </MotionDiv>
                 ))}
                 
                 {/* Add Manual Card Button */}
@@ -216,7 +221,7 @@ const FlashcardGenerator: React.FC = () => {
                     <span className="font-bold">Add Custom Card</span>
                 </button>
              </div>
-          </motion.div>
+          </MotionDiv>
         )}
       </AnimatePresence>
     </div>

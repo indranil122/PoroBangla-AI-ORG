@@ -1,12 +1,18 @@
+
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+// FIX: Using * as Router to handle potential export issues in some environments
+import * as Router from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Check, X, Repeat } from 'lucide-react';
 import { TestResult } from '../types';
 
-const TestResult: React.FC = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
+// FIX: Casting motion components to any
+const MotionDiv = motion.div as any;
+const MotionPath = motion.path as any;
+
+const TestResultPage: React.FC = () => {
+    const navigate = Router.useNavigate();
+    const location = Router.useLocation();
     const result: TestResult | undefined = location.state?.result;
 
     if (!result) {
@@ -28,7 +34,7 @@ const TestResult: React.FC = () => {
         <div className="min-h-screen w-full pt-24 pb-12 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto">
                 {/* Header and Score Summary */}
-                <motion.div 
+                <MotionDiv 
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -55,7 +61,7 @@ const TestResult: React.FC = () => {
                                     fill="none"
                                     strokeWidth="3"
                                 />
-                                <motion.path
+                                <MotionPath
                                     className="stroke-current text-primary"
                                     d="M18 2.0845
                                     a 15.9155 15.9155 0 0 1 0 31.831
@@ -73,7 +79,7 @@ const TestResult: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Question Review */}
                 <h2 className="text-2xl font-bold text-white mb-6">Review Your Answers</h2>
@@ -83,7 +89,7 @@ const TestResult: React.FC = () => {
                         const isCorrect = userAnswer === q.correctAnswerIndex;
 
                         return (
-                            <motion.div 
+                            <MotionDiv 
                                 key={index}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -110,7 +116,7 @@ const TestResult: React.FC = () => {
                                 <p className="text-xs text-secondary-dark p-3 bg-black/20 rounded-lg">
                                     <strong className="text-primary-dark">Explanation:</strong> {q.explanation}
                                 </p>
-                            </motion.div>
+                            </MotionDiv>
                         );
                     })}
                 </div>
@@ -129,4 +135,4 @@ const TestResult: React.FC = () => {
     );
 };
 
-export default TestResult;
+export default TestResultPage;

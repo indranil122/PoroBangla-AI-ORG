@@ -1,12 +1,16 @@
+
 import React, { useEffect, useState } from 'react';
-// FIX: The `Variants` type from Framer Motion is used to correctly type the animation variants object. This resolves a TypeScript error where the `type` property was being inferred as a generic `string` instead of the required literal type ('spring').
-import { motion, Variants } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+// FIX: Using * as Router to handle potential export issues in some environments
+import * as Router from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Layers, BrainCircuit, Trash2, ArrowRight, Play, Clock, Plus } from 'lucide-react';
 import { Deck } from '../types';
 import { getDecks, deleteDeck } from '../services/flashcardService';
 
-const containerVariants: Variants = {
+// FIX: Casting motion components to any
+const MotionDiv = motion.div as any;
+
+const containerVariants: any = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -16,7 +20,7 @@ const containerVariants: Variants = {
   },
 };
 
-const itemVariants: Variants = {
+const itemVariants: any = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -26,7 +30,7 @@ const itemVariants: Variants = {
 };
 
 const FlashcardDashboard: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = Router.useNavigate();
   const [decks, setDecks] = useState<Deck[]>([]);
 
   useEffect(() => {
@@ -86,7 +90,7 @@ const FlashcardDashboard: React.FC = () => {
         </div>
       ) : (
         /* Deck Grid */
-        <motion.div 
+        <MotionDiv 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             variants={containerVariants}
             initial="hidden"
@@ -98,7 +102,7 @@ const FlashcardDashboard: React.FC = () => {
             const progress = totalCards > 0 ? (totalCards - dueCount) / totalCards * 100 : 100;
             
             return (
-              <motion.div
+              <MotionDiv
                 key={deck.id}
                 variants={itemVariants}
                 whileHover={{ y: -8 }}
@@ -148,10 +152,10 @@ const FlashcardDashboard: React.FC = () => {
                       style={{ width: `${progress}%` }}
                    />
                 </div>
-              </motion.div>
+              </MotionDiv>
             );
           })}
-        </motion.div>
+        </MotionDiv>
       )}
     </div>
   );

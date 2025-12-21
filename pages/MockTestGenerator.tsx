@@ -1,12 +1,18 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+// FIX: Using * as Router to handle potential export issues in some environments
+import * as Router from 'react-router-dom';
 import { Layers, GraduationCap, Hash, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { generateMockTest } from '../services/geminiService';
 import { MockTest } from '../types';
 
+// FIX: Casting motion components to any
+const MotionDiv = motion.div as any;
+const MotionButton = motion.button as any;
+
 const MockTestGenerator: React.FC = () => {
-    const navigate = useNavigate();
+    const navigate = Router.useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -39,7 +45,7 @@ const MockTestGenerator: React.FC = () => {
 
     return (
         <div className="relative min-h-screen w-full z-10 flex flex-col items-center justify-center pt-24 pb-12 overflow-x-hidden">
-            <motion.div
+            <MotionDiv
                 key="mock-test-generator"
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -112,7 +118,7 @@ const MockTestGenerator: React.FC = () => {
                         </div>
 
                         {/* Submit Button */}
-                        <motion.button
+                        <MotionButton
                             type="submit"
                             disabled={isLoading}
                             whileHover={!isLoading ? { scale: 1.02, boxShadow: "0 0 25px -5px rgba(243, 197, 103, 0.4)" } : {}}
@@ -128,10 +134,10 @@ const MockTestGenerator: React.FC = () => {
                                     Start Test <ArrowRight size={18} />
                                 </>
                             )}
-                        </motion.button>
+                        </MotionButton>
                     </form>
                 </div>
-            </motion.div>
+            </MotionDiv>
             <style>{`
                 .range-slider::-webkit-slider-thumb {
                     -webkit-appearance: none;

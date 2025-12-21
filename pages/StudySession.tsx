@@ -1,13 +1,19 @@
+
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useParams, useNavigate } from 'react-router-dom';
+// FIX: Using * as Router to handle potential export issues in some environments
+import * as Router from 'react-router-dom';
 import { ArrowLeft, CheckCircle, RotateCcw, BrainCircuit, X } from 'lucide-react';
 import { Deck, Flashcard } from '../types';
 import { getDecks, saveDeck, calculateNextReview } from '../services/flashcardService';
 
+// FIX: Casting motion components to any
+const MotionDiv = motion.div as any;
+const MotionP = motion.p as any;
+
 const StudySession: React.FC = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = Router.useParams();
+  const navigate = Router.useNavigate();
   const [deck, setDeck] = useState<Deck | null>(null);
   const [queue, setQueue] = useState<Flashcard[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -84,7 +90,7 @@ const StudySession: React.FC = () => {
   if (sessionComplete) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-[#050505]">
-        <motion.div 
+        <MotionDiv 
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-[#0F0F0F] border border-primary/20 p-12 rounded-3xl shadow-[0_0_50px_-20px_rgba(243,197,103,0.3)] max-w-md w-full"
@@ -103,7 +109,7 @@ const StudySession: React.FC = () => {
             >
                 Finish Session
             </button>
-        </motion.div>
+        </MotionDiv>
       </div>
     );
   }
@@ -159,7 +165,7 @@ const StudySession: React.FC = () => {
                  <div className="absolute top-4 left-4 w-full h-full bg-[#141414] rounded-3xl border border-white/5 shadow-none -z-20 scale-[0.96]"></div>
              )}
 
-             <motion.div
+             <MotionDiv
                 className="w-full h-full relative preserve-3d transition-all duration-700 ease-[cubic-bezier(0.23, 1, 0.32, 1)]"
                 animate={{ rotateY: isFlipped ? 180 : 0 }}
                 style={{ transformStyle: 'preserve-3d' }}
@@ -168,7 +174,7 @@ const StudySession: React.FC = () => {
                 <div 
                     className="absolute inset-0 backface-hidden bg-[#0F0F0F] rounded-3xl flex flex-col items-center justify-center p-8 md:p-16 text-center shadow-[0_20px_50px_-12px_rgba(0,0,0,0.7)] border border-secondary/10"
                     style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E")`
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E")`
                     }}
                 >
                     <div className="absolute top-6 right-6">
@@ -208,14 +214,14 @@ const StudySession: React.FC = () => {
                         {currentCard.back}
                     </p>
                 </div>
-             </motion.div>
+             </MotionDiv>
         </div>
 
         {/* CONTROLS AREA */}
         <div className="mt-16 w-full max-w-xl h-24 flex items-center justify-center">
             <AnimatePresence mode="wait">
                 {!isFlipped ? (
-                    <motion.p 
+                    <MotionP 
                         key="instruction"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -223,9 +229,9 @@ const StudySession: React.FC = () => {
                         className="text-secondary-dark italic text-sm font-medium tracking-wide"
                     >
                         Recall the answer, then reveal the card.
-                    </motion.p>
+                    </MotionP>
                 ) : (
-                    <motion.div 
+                    <MotionDiv 
                         key="controls"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -248,7 +254,7 @@ const StudySession: React.FC = () => {
                             <span className="text-[10px] font-bold uppercase text-secondary-dark group-hover:text-primary transition-colors">Easy</span>
                             <span className="text-sm font-bold text-secondary group-hover:text-primary transition-colors">7d</span>
                         </button>
-                    </motion.div>
+                    </MotionDiv>
                 )}
             </AnimatePresence>
         </div>
