@@ -1,22 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Sparkles, AlertCircle, Layers, GraduationCap, Settings, Type, LayoutTemplate, X, ArrowLeft, Languages, Download, FileText } from 'lucide-react';
-// FIX: Using * as Router to handle potential export issues in some environments
-import * as Router from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { NoteLanguage, NoteRequest } from '../types';
 import { generateNotes } from '../services/geminiService';
 import Notebook, { NotebookSettings } from '../components/Notebook';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
-// FIX: Casting motion components to any
-const MotionDiv = motion.div as any;
-const MotionButton = motion.button as any;
-const MotionSpan = motion.span as any;
-
 const Generator: React.FC = () => {
-  const navigate = Router.useNavigate();
+  const navigate = useNavigate();
   const [step, setStep] = useState<'input' | 'result'>('input');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState("Initializing...");
@@ -179,7 +172,7 @@ const Generator: React.FC = () => {
         
         {/* INPUT FORM STATE */}
         {step === 'input' && (
-          <MotionDiv
+          <motion.div
             key="input-form"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -303,7 +296,7 @@ const Generator: React.FC = () => {
                       </div>
 
                       {/* Submit Button */}
-                      <MotionButton 
+                      <motion.button 
                           type="submit"
                           disabled={isLoading}
                           whileHover={!isLoading ? { scale: 1.01, boxShadow: "0 0 25px -5px rgba(243, 197, 103, 0.5)" } : {}}
@@ -316,14 +309,14 @@ const Generator: React.FC = () => {
                           {isLoading ? (
                               <div className="flex items-center gap-2 min-w-[150px] justify-center">
                                 <Loader2 size={18} className="animate-spin text-black" />
-                                <MotionSpan 
+                                <motion.span 
                                     key={loadingStatus}
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     className="truncate"
                                 >
                                     {loadingStatus}
-                                </MotionSpan>
+                                </motion.span>
                               </div>
                           ) : (
                               <>
@@ -332,7 +325,7 @@ const Generator: React.FC = () => {
                                   </span>
                               </>
                           )}
-                      </MotionButton>
+                      </motion.button>
                     </form>
                 </div>
               </div>
@@ -348,12 +341,12 @@ const Generator: React.FC = () => {
                 animation: gradient 4s ease infinite;
               }
             `}</style>
-          </MotionDiv>
+          </motion.div>
         )}
 
         {/* RESULT STATE */}
         {step === 'result' && (
-          <MotionDiv
+          <motion.div
             key="result"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -394,7 +387,7 @@ const Generator: React.FC = () => {
                         
                         <AnimatePresence>
                           {showSettings && (
-                            <MotionDiv 
+                            <motion.div 
                               initial={{ opacity: 0, y: -10, scale: 0.95 }}
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -451,7 +444,7 @@ const Generator: React.FC = () => {
                                 </div>
                               </div>
 
-                            </MotionDiv>
+                            </motion.div>
                           )}
                         </AnimatePresence>
                     </div>
@@ -459,7 +452,6 @@ const Generator: React.FC = () => {
                     {/* Main Actions */}
                     <div className="flex gap-3">
                         <button 
-                            // FIX: Changed setNoteStep to setStep to fix undefined variable error
                             onClick={() => setStep('input')}
                             className="px-6 py-2.5 rounded-xl bg-white/5 text-secondary hover:bg-white/10 hover:text-white transition-colors text-sm font-semibold border border-white/10"
                         >
@@ -498,7 +490,7 @@ const Generator: React.FC = () => {
              <div className="mt-12 mb-8 text-center text-secondary-dark text-xs font-mono uppercase tracking-widest opacity-50">
                 Powered by Myndra AI
              </div>
-          </MotionDiv>
+          </motion.div>
         )}
 
       </AnimatePresence>

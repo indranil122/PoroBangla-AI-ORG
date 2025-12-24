@@ -11,9 +11,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
-// FIX: Casting motion components to any
-const MotionDiv = motion.div as any;
-
 const StudyGuide: React.FC = () => {
   const [step, setStep] = useState<'input' | 'result'>('input');
   const [isLoading, setIsLoading] = useState(false);
@@ -108,7 +105,7 @@ const StudyGuide: React.FC = () => {
     <div className="min-h-screen w-full pt-28 pb-20 px-4 md:px-8 flex flex-col items-center">
       <AnimatePresence mode="wait">
         {step === 'input' && (
-          <MotionDiv 
+          <motion.div 
             key="input"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -206,11 +203,11 @@ const StudyGuide: React.FC = () => {
                   </button>
                </form>
             </div>
-          </MotionDiv>
+          </motion.div>
         )}
 
         {step === 'result' && (
-          <MotionDiv 
+          <motion.div 
             key="result"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -280,7 +277,7 @@ const StudyGuide: React.FC = () => {
             <div className="mt-12 text-center">
                <p className="text-secondary-dark text-xs uppercase tracking-[0.3em] opacity-40">Architected by Myndra AI Core</p>
             </div>
-          </MotionDiv>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

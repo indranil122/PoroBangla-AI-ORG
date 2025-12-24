@@ -2,35 +2,30 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Zap, BookOpen, BrainCircuit, ArrowRight, Target, GraduationCap } from 'lucide-react';
-// FIX: Using * as Router to handle potential export issues in some environments
-import * as Router from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 
-// FIX: Casting motion components to any to resolve property missing errors
-const MotionDiv = motion.div as any;
-const MotionButton = motion.button as any;
-
 const Home: React.FC = () => {
-  const navigate = Router.useNavigate();
+  const navigate = useNavigate();
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-between overflow-x-hidden">
       
       <div className="flex-1 w-full flex flex-col items-center justify-center p-6 text-center mt-20 md:mt-32">
         
-        <MotionDiv 
+        <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="z-10 max-w-5xl flex flex-col items-center"
         >
-          <MotionDiv 
+          <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-[10px] font-bold tracking-[0.3em] text-primary uppercase mb-8"
           >
             PoroBangla AI 3.0 • Premium
-          </MotionDiv>
+          </motion.div>
 
           <h1 className="text-7xl md:text-9xl font-bold tracking-tighter text-white mb-6 leading-none">
             Intelligence <br />
@@ -44,24 +39,24 @@ const Home: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <MotionButton
+            <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/workspace')}
               className="px-10 py-5 bg-primary text-black font-extrabold rounded-full text-lg shadow-[0_0_50px_-10px_rgba(243,197,103,0.4)] flex items-center gap-3 transition-all"
             >
               Start Generating <ArrowRight size={20} />
-            </MotionButton>
-            <MotionButton
+            </motion.button>
+            <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/study-guide')}
               className="px-10 py-5 bg-white/5 border border-white/10 text-white font-extrabold rounded-full text-lg hover:bg-white/10 transition-all"
             >
               Study Guide <Target size={20} className="inline ml-1" />
-            </MotionButton>
+            </motion.button>
           </div>
-        </MotionDiv>
+        </motion.div>
 
         {/* Features Grid */}
         <div className="mt-40 w-full max-w-7xl z-10 px-4">
@@ -86,7 +81,7 @@ const Home: React.FC = () => {
                 color: "text-secondary"
               }
             ].map((feature, idx) => (
-              <MotionDiv
+              <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -99,7 +94,7 @@ const Home: React.FC = () => {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-4">{feature.title}</h3>
                 <p className="text-secondary-dark leading-relaxed font-light">{feature.desc}</p>
-              </MotionDiv>
+              </motion.div>
             ))}
           </div>
         </div>

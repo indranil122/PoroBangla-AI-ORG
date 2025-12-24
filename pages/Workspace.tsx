@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// FIX: Using * as Router to handle potential export issues in some environments
-import * as Router from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   Layers, GraduationCap, Hash, ArrowRight, Loader2, AlertCircle, 
   Sparkles, Settings, Type, LayoutTemplate, X, Download, Languages, 
@@ -15,13 +13,8 @@ import Footer from '../components/Footer';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
-// FIX: Casting motion components to any
-const MotionDiv = motion.div as any;
-const MotionButton = motion.button as any;
-const MotionSpan = motion.span as any;
-
 const Workspace: React.FC = () => {
-    const navigate = Router.useNavigate();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'notes' | 'mocktests'>('notes');
 
     // --- NOTES STATE ---
@@ -236,7 +229,7 @@ const Workspace: React.FC = () => {
                         </button>
                         
                         {/* Sliding Background */}
-                        <MotionDiv 
+                        <motion.div 
                             className="absolute top-1 bottom-1 bg-gradient-to-r from-[#D8A441] to-[#F3C567] rounded-full"
                             initial={false}
                             animate={{
@@ -251,7 +244,7 @@ const Workspace: React.FC = () => {
 
                 <AnimatePresence mode="wait">
                     {activeTab === 'notes' ? (
-                        <MotionDiv
+                        <motion.div
                             key="notes"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -260,7 +253,7 @@ const Workspace: React.FC = () => {
                             className="w-full flex flex-col items-center"
                         >
                             {noteStep === 'input' && (
-                                <MotionDiv 
+                                <motion.div 
                                     initial={{ opacity: 0, scale: 0.98 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     className="w-full max-w-2xl"
@@ -360,7 +353,7 @@ const Workspace: React.FC = () => {
                                                     </div>
                                                 </div>
 
-                                                <MotionButton 
+                                                <motion.button 
                                                     type="submit"
                                                     disabled={isNoteLoading}
                                                     whileHover={!isNoteLoading ? { scale: 1.01, boxShadow: "0 0 25px -5px rgba(243, 197, 103, 0.5)" } : {}}
@@ -373,14 +366,14 @@ const Workspace: React.FC = () => {
                                                     {isNoteLoading ? (
                                                         <div className="flex items-center gap-2 min-w-[150px] justify-center">
                                                             <Loader2 size={18} className="animate-spin text-black" />
-                                                            <MotionSpan 
+                                                            <motion.span 
                                                                 key={loadingStatus}
                                                                 initial={{ opacity: 0, y: 5 }}
                                                                 animate={{ opacity: 1, y: 0 }}
                                                                 className="truncate"
                                                             >
                                                                 {loadingStatus}
-                                                            </MotionSpan>
+                                                            </motion.span>
                                                         </div>
                                                     ) : (
                                                         <>
@@ -389,15 +382,15 @@ const Workspace: React.FC = () => {
                                                             </span>
                                                         </>
                                                     )}
-                                                </MotionButton>
+                                                </motion.button>
                                             </form>
                                         </div>
                                     </div>
-                                </MotionDiv>
+                                </motion.div>
                             )}
 
                             {noteStep === 'result' && (
-                                <MotionDiv
+                                <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     className="w-full flex flex-col items-center"
@@ -427,7 +420,7 @@ const Workspace: React.FC = () => {
                                                 
                                                 <AnimatePresence>
                                                     {showSettings && (
-                                                        <MotionDiv 
+                                                        <motion.div 
                                                             initial={{ opacity: 0, y: -10, scale: 0.95 }}
                                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                                             exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -481,7 +474,7 @@ const Workspace: React.FC = () => {
                                                                     ))}
                                                                 </div>
                                                             </div>
-                                                        </MotionDiv>
+                                                        </motion.div>
                                                     )}
                                                 </AnimatePresence>
                                             </div>
@@ -521,11 +514,11 @@ const Workspace: React.FC = () => {
                                         settings={printSettings}
                                         sources={generatedSources}
                                     />
-                                </MotionDiv>
+                                </motion.div>
                             )}
-                        </MotionDiv>
+                        </motion.div>
                     ) : (
-                        <MotionDiv
+                        <motion.div
                             key="mocktests"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -621,7 +614,7 @@ const Workspace: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                        </MotionDiv>
+                        </motion.div>
                     )}
                 </AnimatePresence>
 
