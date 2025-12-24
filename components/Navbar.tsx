@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ArrowRight, Layout, Brain, Target, Sparkles } from 'lucide-react';
+import { Menu, X, ArrowRight, Zap, Layout } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -12,7 +11,7 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -21,25 +20,29 @@ const Navbar: React.FC = () => {
   const navVariants = {
     top: { 
       width: "100%", 
+      maxWidth: "100vw",
       y: 0, 
       borderRadius: "0px",
       backgroundColor: "rgba(5, 5, 5, 0)",
-      paddingTop: "2rem",
+      borderColor: "rgba(255, 255, 255, 0)",
+      paddingTop: "2.5rem",
       paddingBottom: "1.5rem",
       backdropFilter: "blur(0px)",
-      borderColor: "transparent",
+      boxShadow: "0 0 0 0 rgba(0,0,0,0)",
+      transform: "translateZ(0)"
     },
     scrolled: { 
-      width: "95%", 
-      maxWidth: "1100px", 
-      y: 15, 
-      borderRadius: "100px",
-      backgroundColor: "rgba(10, 10, 10, 0.85)", 
-      paddingTop: "0.6rem",
-      paddingBottom: "0.6rem",
-      backdropFilter: "blur(24px)",
-      borderColor: "rgba(255, 255, 255, 0.08)",
-      boxShadow: "0 20px 40px -15px rgba(0,0,0,0.7)"
+      width: "90%", 
+      maxWidth: "800px", 
+      y: 20, 
+      borderRadius: "9999px",
+      backgroundColor: "rgba(15, 15, 15, 0.9)", // Dark Card
+      borderColor: "rgba(200, 204, 209, 0.2)", // Silver border
+      paddingTop: "0.75rem",
+      paddingBottom: "0.75rem",
+      backdropFilter: "blur(16px)",
+      boxShadow: "0 10px 40px -10px rgba(0,0,0,0.8)",
+      transform: "translateZ(0)"
     }
   };
 
@@ -50,94 +53,118 @@ const Navbar: React.FC = () => {
           initial="top"
           animate={isScrolled ? "scrolled" : "top"}
           variants={navVariants}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="pointer-events-auto flex items-center justify-between px-6 md:px-12 border transition-all duration-300"
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="pointer-events-auto flex items-center justify-between px-6 md:px-8 border"
         >
-          {/* Brand Logo Section */}
+          {/* Logo and Tagline */}
           <div 
             onClick={() => navigate('/')}
-            className="flex items-center gap-3 cursor-pointer group shrink-0"
+            className="flex flex-col items-start cursor-pointer group"
           >
-            <div className="relative">
+            <div className="flex items-center gap-2">
               <img 
                 src="https://github.com/indranil122/image/blob/main/Gemini_Generated_Image_hc3ecmhc3ecmhc3e-Photoroom.png?raw=true" 
-                alt="Logo"
-                className={`transition-all duration-500 ${isScrolled ? 'w-7 h-7' : 'w-9 h-9'}`}
+                alt="PoroBangla AI Logo"
+                className="w-8 h-8 object-contain drop-shadow-lg"
               />
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-            
-            <div className="flex items-center">
-              <span className={`font-extrabold tracking-tighter text-white transition-all duration-300 ${isScrolled ? 'text-lg' : 'text-2xl'}`}>
-                PoroBangla
+              <span className={`
+                font-bold tracking-tight transition-all duration-300
+                ${isScrolled ? 'text-sm text-secondary' : 'text-lg text-secondary'}
+              `}>
+                PoroBangla<span className="text-primary">AI</span>
               </span>
-              <div className="ml-1 px-1.5 py-0.5 bg-primary rounded-[4px] flex items-center justify-center">
-                <span className="text-[10px] font-black text-black">AI</span>
-              </div>
             </div>
+            <AnimatePresence>
+            {!isScrolled && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="pl-10 -mt-1"
+              >
+                <div className="flex items-center gap-2 text-secondary-dark group-hover:text-primary transition-colors">
+                  <img 
+                    src="https://github.com/indranil122/image/blob/main/MyndraLogoWB.png?raw=true" 
+                    alt="Myndra AI"
+                    className="w-3 h-3 object-contain opacity-80"
+                  />
+                  <span className="text-[10px] font-bold tracking-wider">Powered by Myndra AI</span>
+                </div>
+              </motion.div>
+            )}
+            </AnimatePresence>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-1">
-            <button 
-              onClick={() => navigate('/workspace')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all group ${
-                location.pathname === '/workspace' ? 'text-white' : 'text-secondary-dark hover:text-white'
-              }`}
-            >
-              <Layout size={15} className={`transition-colors ${location.pathname === '/workspace' ? 'text-primary' : 'group-hover:text-primary'}`} />
-              Workspace
-            </button>
-
-            <button 
-              onClick={() => navigate('/study-guide')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all group ${
-                location.pathname === '/study-guide' ? 'text-white' : 'text-secondary-dark hover:text-white'
-              }`}
-            >
-              <Target size={15} className={`transition-colors ${location.pathname === '/study-guide' ? 'text-primary' : 'group-hover:text-primary'}`} />
-              <div className="flex flex-col items-start leading-[1.1]">
-                <span>Study</span>
-                <span className="opacity-50 text-[8px]">Guide</span>
-              </div>
-            </button>
-
-            <button 
-              onClick={() => navigate('/flashcards')}
-              className={`ml-2 flex items-center gap-2 px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all border ${
-                location.pathname.includes('/flashcards') || location.pathname.includes('/study/')
-                ? 'bg-primary border-primary text-black' 
-                : 'bg-primary/5 border-primary/20 text-primary hover:bg-primary hover:text-black hover:shadow-[0_0_20px_-5px_rgba(243,197,103,0.5)]'
-              }`}
-            >
-              <Brain size={15} />
-              Flashcards
-            </button>
+          {/* Desktop Links (Center) */}
+          <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+             {!location.pathname.startsWith('/test-') && !location.pathname.startsWith('/study') && location.pathname !== '/workspace' && (
+               <>
+                 <button 
+                   onClick={() => navigate('/workspace')}
+                   className={`
+                     px-5 py-2 text-sm font-medium transition-all duration-300 rounded-full flex items-center gap-2
+                     ${isScrolled 
+                       ? 'text-secondary-dark hover:text-white hover:bg-white/5' 
+                       : 'text-secondary hover:text-white'
+                     }
+                   `}
+                 >
+                   <Layout size={14} /> Workspace
+                 </button>
+               </>
+             )}
           </div>
 
-          {/* Launch / Action Area */}
-          <div className="flex items-center gap-4">
+          {/* Actions (Right) */}
+          <div className="flex items-center gap-3">
+             {/* Mobile Menu Toggle */}
              <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white transition-all"
+                className="md:hidden p-2 text-secondary hover:text-primary transition-colors"
              >
                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
              </button>
 
-             <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/workspace')}
-                className={`
-                   hidden md:flex items-center gap-2 font-black rounded-full transition-all uppercase tracking-[0.2em] text-[10px]
-                   ${isScrolled 
-                      ? 'px-6 py-2.5 bg-white text-black hover:bg-primary transition-colors' 
-                      : 'px-7 py-3 bg-white/5 border border-white/10 text-white hover:border-primary hover:text-primary backdrop-blur-md'
-                   }
-                `}
-             >
-               Launch <ArrowRight size={14} />
-             </motion.button>
+             {/* Dynamic CTA */}
+             <AnimatePresence mode="wait">
+               {location.pathname === '/' ? (
+                 <motion.button
+                   key="launch"
+                   initial={{ opacity: 0, scale: 0.9 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   exit={{ opacity: 0, scale: 0.9 }}
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
+                   onClick={() => navigate('/workspace')}
+                   className={`
+                      hidden md:flex items-center gap-2 font-semibold transition-all duration-500
+                      ${isScrolled 
+                         ? 'px-5 py-2 text-xs bg-gradient-to-r from-[#D8A441] to-[#F3C567] text-black rounded-full'
+                         : 'px-6 py-2.5 text-sm bg-white/5 text-secondary border border-secondary/20 rounded-full hover:bg-white/10 hover:border-primary/50 hover:text-primary'
+                      }
+                   `}
+                 >
+                   <span>Launch App</span>
+                   <ArrowRight size={isScrolled ? 12 : 14} />
+                 </motion.button>
+               ) : (
+                 <motion.button 
+                    key="exit"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    onClick={() => navigate('/')}
+                    className={`
+                      hidden md:flex items-center gap-2 font-medium transition-colors
+                      ${isScrolled ? 'text-xs text-secondary-dark hover:text-white' : 'text-sm text-secondary hover:text-white'}
+                    `}
+                >
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                    Exit Workspace
+                </motion.button>
+               )}
+             </AnimatePresence>
           </div>
         </motion.nav>
       </div>
@@ -146,44 +173,24 @@ const Navbar: React.FC = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-             initial={{ opacity: 0, y: -20, scale: 0.95 }}
-             animate={{ opacity: 1, y: 0, scale: 1 }}
-             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-             className="fixed top-24 left-4 right-4 z-[99] bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] p-8 shadow-2xl md:hidden overflow-hidden"
+             initial={{ opacity: 0, y: -20, height: 0 }}
+             animate={{ opacity: 1, y: 0, height: 'auto' }}
+             exit={{ opacity: 0, y: -20, height: 0 }}
+             className="fixed top-24 left-4 right-4 z-40 bg-[#0F0F0F]/95 backdrop-blur-xl border border-secondary/20 rounded-2xl overflow-hidden shadow-2xl md:hidden"
           >
-             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
-             
-             <div className="flex flex-col gap-3 relative z-10">
-               {[
-                 { name: 'Workspace', path: '/workspace', icon: Layout },
-                 { name: 'Study Guide', path: '/study-guide', icon: Target },
-                 { name: 'Flashcards', path: '/flashcards', icon: Brain },
-                 { name: 'Mock Tests', path: '/mock-test', icon: Sparkles },
-               ].map(link => (
-                 <button 
-                    key={link.path}
-                    onClick={() => { navigate(link.path); setIsMobileMenuOpen(false); }}
-                    className={`flex items-center justify-between p-5 rounded-2xl transition-all border ${
-                      location.pathname === link.path 
-                      ? 'bg-primary/10 border-primary/30 text-white' 
-                      : 'bg-white/5 border-transparent text-secondary hover:text-white'
-                    }`}
-                 >
-                    <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-lg ${location.pathname === link.path ? 'bg-primary text-black' : 'bg-white/5 text-primary'}`}>
-                        <link.icon size={20} />
-                      </div>
-                      <span className="font-bold text-base tracking-tight">{link.name}</span>
-                    </div>
-                    <ArrowRight size={18} className="opacity-40" />
-                 </button>
-               ))}
-               
+             <div className="p-6 flex flex-col gap-4">
+               <button onClick={() => { navigate('/workspace'); setIsMobileMenuOpen(false); }} className="text-left text-secondary py-3 border-b border-white/5 flex items-center justify-between group">
+                  Workspace
+                  <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
+               </button>
                <button 
-                  onClick={() => { navigate('/workspace'); setIsMobileMenuOpen(false); }}
-                  className="mt-6 w-full py-5 bg-primary text-black font-black text-sm uppercase tracking-[0.2em] rounded-2xl flex items-center justify-center gap-3 shadow-[0_15px_30px_-10px_rgba(243,197,103,0.3)] active:scale-95 transition-all"
+                 onClick={() => {
+                    navigate('/workspace');
+                    setIsMobileMenuOpen(false);
+                 }}
+                 className="mt-2 w-full py-4 bg-gradient-to-r from-[#D8A441] to-[#F3C567] text-black font-bold rounded-xl flex items-center justify-center gap-2"
                >
-                  Launch App <ArrowRight size={18} />
+                 <Zap size={16} fill="currentColor" /> Launch App
                </button>
              </div>
           </motion.div>

@@ -1,4 +1,3 @@
-
 export enum NoteLanguage {
   English = 'English',
   Bengali = 'Bengali'
@@ -68,18 +67,4 @@ export interface Deck {
   createdAt: number;
   lastStudied: number;
   topic: string;
-}
-
-// --- STUDY GUIDE TYPES ---
-
-export interface StudyGuideRequest {
-  topic: string;
-  days: number;
-  details: string;
-  level: string;
-}
-
-export interface StudyGuideResponse {
-  content: string; // Markdown formatted guide
-  summary: string;
 }
